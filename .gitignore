@@ -1,0 +1,10 @@
+.idea
+*.jar
+lib/commons-net/
+lib/org/
+lib/commons-logging/
+log/
+tmp/
+*.log
+*.db
+*.hprof

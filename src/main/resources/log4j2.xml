@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration name="ConsoleLogConfig" status="info" monitorInterval="5">
+
+    <Properties>
+        <Property name="basePath">./log</Property>
+        <Property name="defaultPattern">%d %-5p [%t] %c{5} (%F:%L) - %m%throwable%n</Property>
+        <Property name="jrubyPattern">%d %-5p [%t] %c - %m%throwable%n</Property>
+        <Property name="ftpWirePattern">%d %-5p [%t] FTP %msg%n</Property>
+        <Property name="httpWirePattern">%d %-5p [%t] HTTP %msg%n</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout pattern="${defaultPattern}"/>
+        </Console>
+        <Console name="JRuby" target="SYSTEM_OUT">
+            <PatternLayout pattern="${jrubyPattern}"/>
+        </Console>
+        <RollingFile name="FILE-OUT"
+                     fileName="${basePath}/mercury.log"
+                     filePattern="${basePath}/mercury-%d{yyyy-MM-dd}.log">
+            <PatternLayout>
+                <MarkerPatternSelector defaultPattern="${defaultPattern}">
+                    <PatternMatch key="FTP-WIRE" pattern="${ftpWirePattern}"/>
+                    <PatternMatch key="HTTP-WIRE" pattern="${httpWirePattern}"/>
+                </MarkerPatternSelector>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+                <SizeBasedTriggeringPolicy size="200MB" />
+            </Policies>
+            <!-- Max 10 files will be created everyday -->
+<!--
+            <DefaultRolloverStrategy max="10">
+                <Delete basePath="${basePath}" maxDepth="10">
+                    &lt;!&ndash; Delete all files older than 30 days &ndash;&gt;
+                    <IfLastModified age="30d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+-->
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Logger name="jruby" level="debug" additivity="false">
+            <AppenderRef ref="JRuby" />
+            <AppenderRef ref="FILE-OUT"/>
+        </Logger>
+        <Logger name="ftp-wire" level="debug" additivity="false">
+            <AppenderRef ref="FILE-OUT" />
+        </Logger>
+        <Logger name="org.apache.http" level="info"></Logger>
+        <Logger name="org.apache.http.headers" level="warn"></Logger>
+        <Logger name="org.apache.http.wire" level="debug">
+            <AppenderRef ref="FILE-OUT" />
+        </Logger>
+        <Root level="debug">
+            <AppenderRef ref="STDOUT"/>
+            <AppenderRef ref="FILE-OUT"/>
+        </Root>
+    </Loggers>
+</Configuration>
