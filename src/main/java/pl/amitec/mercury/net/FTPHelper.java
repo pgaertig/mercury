@@ -51,8 +51,10 @@ public class FTPHelper {
         ftp.setFileType(FTP.BINARY_FILE_TYPE);
     }
     public void disconnect() throws IOException {
-        ftp.logout();
-        ftp.disconnect();
+        if(ftp.isConnected()) {
+            ftp.logout();
+            ftp.disconnect();
+        }
     }
 
     public FTPFile[] listFiles(String path) throws IOException {
@@ -102,5 +104,9 @@ public class FTPHelper {
         try (FileInputStream fis = new FileInputStream(localPath)) {
             ftp.storeFile(remotePath, fis);
         }
+    }
+
+    public boolean uploadFile(InputStream dataStream, String remotePath) throws IOException {
+        return ftp.storeFile(remotePath, dataStream);
     }
 }

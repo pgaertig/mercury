@@ -86,6 +86,7 @@ GEM
 PLATFORMS
   universal-java-11
   universal-java-19
+  universal-java-20
 
 DEPENDENCIES
   ftpd
@@ -106,4 +107,4 @@ DEPENDENCIES
   sinatra (~> 1.4)
 
 BUNDLED WITH
-   2.2.29
+   2.2.33

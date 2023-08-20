@@ -5,14 +5,17 @@ require 'csv'
 class Mercury::Polsoft
   enable_logger
 
+
   def self.configure(config, output: nil)
     unless @write_transport
-      @write_transport = Mercury::Transport::Filesystem.configure(config, readonly: false, mode: 'r:iso-8859-2:utf-8')
+      @write_transport =
+        pl.amitec.mercury.transport.FilesystemTransport.configure(config, false, 'iso-8859-2')
+      #Mercury::Transport::Filesystem.configure(config, readonly: false, mode: 'r:iso-8859-2:utf-8')
     end
     unless @redbay_client
       @redbay_client = Mercury::RedbayClient.configure(config)
     end
-    cache = Mercury::HashCache.new('/tmp/mercury-hash-cache')
+    cache = Mercury::HashCache.new('data/mercury-hash-cache')
     new(config: config, write_transport: @write_transport, redbay_client: @redbay_client, cache: cache)
   end
 
@@ -25,13 +28,15 @@ class Mercury::Polsoft
   end
 
   def watch
-    psftp = Mercury::PolsoftFtp.new
+    #psftp = Mercury::PolsoftFtp.new
+    psftp = pl.amitec.mercury.providers.polsoft.PolsoftFtp.configure(@config)
     while true do
       sync_orders
-      state = psftp.wait_for_content_pull
+      psftp.syncDirToRemote("data/IMPORT_ODDZ_1", "data/IMPORT_ODDZ_1-sent", "/IMPORT_ODDZ_1")
+      state = psftp.wait_for_content_pull("/EKSPORT_ODDZ_1")
       if(state)
-        sync(state[:transport])
-        psftp.failure_cleanup(state) #FIXME keeps dir
+        sync(state.transport)
+        psftp.failureCleanup(state) #FIXME keeps dir
       end
       sleep 60
     end
@@ -76,7 +81,8 @@ class Mercury::Polsoft
   end
 
   def from_csv(str)
-    CSV.parse(str, headers: true, col_sep: "\t", quote_char: '|')
+    pl.amitec.mercury.util.CSVToMaps.new.stream(str).toList()
+    #CSV.parse(str, headers: true, col_sep: "\t", quote_char: '|')
   end
 
   def sync_variants(dept_dir, dept)
@@ -197,30 +203,35 @@ class Mercury::Polsoft
     return unless dept_dir.exists?("klienci.txt")
     return unless dept_dir.exists?("rabaty.txt")
 
-    clients = from_csv(dept_dir.read("klienci.txt"))
-    logger.debug("klienci.txt: loaded #{clients.length} clients")
-    discounts = from_csv(dept_dir.read("rabaty.txt"))
-    logger.debug("rabaty.txt: loaded #{discounts.length} discounts")
-    unknown_variants = Set.new
+    clients_reader = dept_dir.reader("klienci.txt")
+    discounts_reader = dept_dir.reader("rabaty.txt")
+    clientDiscountsStream = pl.amitec.mercury.providers.polsoft.ClientDiscountStreamer.new.stream(clients_reader, discounts_reader)
+    #logger.debug("klienci.txt: loaded #{clients.length} clients")
+    #discounts = from_csv(dept_dir.read("rabaty.txt"))
+    #logger.debug("rabaty.txt: loaded #{discounts.length} discounts")
+    #unknown_variants = Set.new
 
-    discounts_by_client = discounts.inject({}) do |result, discount|
-      id = discount['kt_numer']
-      client_discounts = result[id] || []
-      variant_source_id = discount['towar_numer']
-      if !variant_source_ids || variant_source_ids.include?(variant_source_id)
-        client_discounts << {source_id: "#{dept}:#{variant_source_id}", price: discount['towar_cena_kontrah']}
-        result[id] = client_discounts
-      else
-        unknown_variants << variant_source_id
-      end
-      result
-    end
 
-    unless unknown_variants.empty?
-      logger.warn("Unkown product IDs for discount: #{unknown_variants}")
-    end
+#    discounts_by_client = discounts.inject({}) do |result, discount|
+    #      id = discount['kt_numer']
+    #  client_discounts = result[id] || []
+    #  variant_source_id = discount['towar_numer']
+    #  if !variant_source_ids || variant_source_ids.include?(variant_source_id)
+    #    client_discounts << {source_id: "#{dept}:#{variant_source_id}", price: discount['towar_cena_kontrah']}
+    #    result[id] = client_discounts
+    #  else
+    #    unknown_variants << variant_source_id
+    #  end
+    #  result
+    #end
 
-    clients.each do |client|
+
+    #unless unknown_variants.empty?
+    #  logger.warn("Unkown product IDs for discount: #{unknown_variants}")
+    #end
+
+    clientDiscountsStream.iterator.each do |clientWithDiscounts|
+      client = clientWithDiscounts.client
       id = client['kt_numer']
       if selected_source_ids && !selected_source_ids.include?(id)
         next
@@ -234,7 +245,7 @@ class Mercury::Polsoft
         json.street client['kt_ulica']
         json.postcode client['kt_kod_pocztowy']
         json.city client['kt_miasto']
-        json.province Mercury::Dict::PostCodes.code_to_province(client['kt_kod_pocztowy'])
+        json.province pl.amitec.mercury.dict.PostCodes.instance.code_to_province(client['kt_kod_pocztowy'])
         json.nip client['kt_nip']
         json.country 'PL'
 
@@ -246,13 +257,18 @@ class Mercury::Polsoft
           json.iph_sector client['kategoria_1']
         end
 
-        if discounts_by_client && discounts_by_client[id]
-          json.stock_discounts discounts_by_client[id]
-          stats[:stock_discounts] += discounts_by_client[id].size
+        discounts = clientWithDiscounts.discounts.to_h
+        if !discounts.empty?
+          discounts_mapped = discounts.map{|k,v|
+            {source_id: "#{dept}:#{k}", price: v}
+          }
+          json.stock_discounts discounts_mapped
+          stats[:stock_discounts] += discounts_mapped.size
         end
       end
 
       payload = json.to_s
+
       begin
         same_data = @hash_cache.hit?(tenant: @config['tenant'],
                                      source: 'ps',
@@ -277,6 +293,9 @@ class Mercury::Polsoft
       end
 
     end
+    ensure
+      clients_reader.close
+      discounts_reader.close
   end
 
   def sync_invoices(dept_dir, dept)
@@ -386,7 +405,7 @@ class Mercury::Polsoft
   def sync_orders
     @redbay_client.session do
       # TODO wsparcie klientow z innych oddzialow
-      import_dir = @write_transport.subdir("IMPORT_ODDZ_1", mode: 'w')
+      import_dir = @write_transport.subdir("IMPORT_ODDZ_1")
 
       orders = @redbay_client.get_orders_journal['list']
 
@@ -401,7 +420,10 @@ class Mercury::Polsoft
         jid = journal_item['id']
         order_id = journal_item['objectId']
         order = @redbay_client.get_order(order_id)
-        order_no = order["uniqueNumber"]
+
+        prefix, sequence_no = order["uniqueNumber"].match(/RB0*(\d+)-0*(\d+)$/).captures
+        order_no = "S#{prefix}-#{sequence_no}"
+
         positions_data = StringIO.new
         header_data = StringIO.new
         positions_csv = CSV.new(positions_data, col_sep: "\t", quote_empty: false)
@@ -437,7 +459,7 @@ class Mercury::Polsoft
           puts header_data.string
           puts positions_data.string
 
-          marker = "#{Time.now.strftime("%Y%m%d%H%M%S")}.#{order_no}"
+          marker = "#{Time.now.strftime("%Y%m%d%H%M%S")}.#{sequence_no}"
           import_dir.write("N#{marker}.txt", header_data.string)
           import_dir.write("P#{marker}.txt", positions_csv.string)
           import_dir.write("f#{marker}.txt", "")
@@ -445,7 +467,7 @@ class Mercury::Polsoft
           # TODO LOG nothing in this source
         end
 
-        #@redbay_client.confirm_journal_item(jid)
+        @redbay_client.confirm_journal_item(jid)
 
         #binding.pry
       end

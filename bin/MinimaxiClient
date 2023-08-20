@@ -1,0 +1,57 @@
+#!/usr/bin/env -S java --source 20 --class-path target/mercury-1.0.0.jar
+
+package bin;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import pl.amitec.mercury.transport.FilesystemTransport;
+import pl.amitec.mercury.persistence.HashCache;
+import pl.amitec.mercury.providers.redbay.RedbayClient;
+import pl.amitec.mercury.JobContext;
+import pl.amitec.mercury.providers.polsoft.ClientSync;
+
+public class MinimaxiClient {
+    public static void main(String[] args) {
+        if (args.length < 1) {
+            System.out.println("Usage: " + Main.class.getName() + " <directory_path> [<source id> ...]");
+            System.exit(1);
+        }
+
+        String dirPath = args[0];
+        List<String> sourceIds = args.length > 1 ? Arrays.asList(Arrays.copyOfRange(args, 1, args.length)) : null;
+
+        System.out.println("Directory Path: " + dirPath);
+        if (sourceIds == null || sourceIds.isEmpty()) {
+            System.out.println("No client source ids, processing all");
+        } else {
+            System.out.println("Client source ids: " + String.join(", ", sourceIds));
+        }
+
+        Map<String, String> config = new HashMap<>();
+        config.put("tenant", "mm");
+        config.put("system", "polsoft");
+        config.put("source", "filesystem");
+        config.put("filesystem.path", dirPath);
+        config.put("redbay.url", "https://panel.b2b-online.pl/api");
+        config.put("redbay.apikey", "xyz");
+        config.put("redbay.auth_id", "abc");
+        config.put("redbay.auth_pass", "def");
+        config.put("polsoft.department", "1");
+
+        FilesystemTransport transport = FilesystemTransport.configure(config, true, "iso-8859-2");
+        HashCache hashCache = new HashCache("data/mercury-hash-cache.db");
+        RedbayClient redbayClient = new RedbayClient(config);
+        JobContext jobContext = new JobContext(hashCache, redbayClient, config);
+
+        redbayClient.session(() -> {
+            new ClientSync().sync(jobContext, transport, 1, null, sourceIds);
+            return null;
+        });
+
+        hashCache.close();
+    }
+}
+
+//main

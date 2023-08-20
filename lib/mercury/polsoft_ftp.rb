@@ -7,6 +7,8 @@ class Mercury::PolsoftFtp
   REQUIRED_FILES = %w{grupy.txt klienci.txt produc.txt rabaty.txt
            rozrach.txt stany.txt toppc.txt towary.txt zestawy.txt zestpoz.txt}
 
+
+
   def initialize
     @last_root_digest = 'none'
     @last_export_digest = 'none'
@@ -78,7 +80,7 @@ class Mercury::PolsoftFtp
         return
       end
 
-      state[:transport] = Mercury::Transport::Filesystem.new(dir, readonly: true, mode: 'r:iso-8859-2:utf-8')
+      state[:transport] = pl.amitec.mercury.transport.FilesystemTransport.configure(dir, true, 'iso-8859-2')
 
       return state
     end

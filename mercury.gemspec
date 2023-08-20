@@ -32,6 +32,7 @@ Gem::Specification.new do |s|
   s.requirements << 'jar org.apache.logging.log4j:log4j-api, 2.19.0'
   s.requirements << 'jar org.apache.logging.log4j:log4j-iostreams, 2.19.0'
   s.requirements << 'jar org.apache.logging.log4j:log4j-jcl, 2.19.0'
+  s.requirements << 'jar org.apache.commons:commons-csv:1.10.0'
   #s.requirements << 'jar org.bouncycastle:bcprov-jdk15on, 1.49'
   #s.requirements << 'jar org.slf4j:slf4j-api, 1.7.7'
 
