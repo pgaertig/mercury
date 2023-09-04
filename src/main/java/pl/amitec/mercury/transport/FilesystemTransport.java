@@ -13,16 +13,8 @@ public class FilesystemTransport implements Transport {
     private final boolean readonly;
     private final Charset charset;
 
-    public static class TransportException extends RuntimeException {
-        public TransportException(String message) {
-            super(message);
-        }
-    }
-
     public FilesystemTransport(String directory, boolean readonly, Charset charset) {
-        if (directory == null) {
-            throw new TransportException("No directory");
-        }
+        Objects.requireNonNull(directory);
         this.directory = Paths.get(directory).toAbsolutePath();
         this.readonly = readonly;
         this.charset = charset;
@@ -30,6 +22,10 @@ public class FilesystemTransport implements Transport {
 
     public static FilesystemTransport configure(Map<String, String> config, boolean readonly, String mode) {
         return new FilesystemTransport(config.get("filesystem.path"), readonly, Charset.forName(mode));
+    }
+
+    public static FilesystemTransport configure(Map<String, String> config, boolean readonly, Charset charset) {
+        return new FilesystemTransport(config.get("filesystem.path"), readonly, charset);
     }
 
     public static FilesystemTransport configure(String path, boolean readonly, String mode) {
@@ -47,41 +43,63 @@ public class FilesystemTransport implements Transport {
     }
 
     @Override
-    public List<String> listFiles() throws IOException {
+    public List<String> listFiles() {
         try (Stream<Path> paths = Files.list(directory)) {
             return paths.filter(Files::isRegularFile)
                     .map(Path::getFileName)
                     .map(Path::toString)
                     .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new TransportException(this, e);
         }
     }
 
     @Override
-    public String read(String path, String mode) throws IOException {
-        return Files.readString(directory.resolve(path));
+    public String read(String path, String mode) {
+        try {
+            return Files.readString(directory.resolve(path));
+        } catch (IOException e) {
+            throw new TransportException(this, e);
+        }
     }
 
     @Override
-    public String read(String path) throws IOException {
-        return Files.readString(directory.resolve(path), charset);
+    public String read(String path)  {
+        try {
+            return Files.readString(directory.resolve(path), charset);
+        } catch (IOException e) {
+            throw new TransportException(this, e);
+        }
     }
 
     @Override
-    public void write(String path, String content) throws IOException {
+    public void write(String path, String content) {
         if (readonly) {
             throw new TransportException("Read only " + directory);
         }
-        Files.writeString(directory.resolve(path), content, charset);
+        try {
+            Files.writeString(directory.resolve(path), content, charset);
+        } catch (IOException e) {
+            throw new TransportException(this, e);
+        }
     }
 
     @Override
-    public List<String> readlines(String path) throws IOException {
-        return Files.readAllLines(directory.resolve(path), charset);
+    public List<String> readlines(String path) {
+        try {
+            return Files.readAllLines(directory.resolve(path), charset);
+        } catch (IOException e) {
+            throw new TransportException(this, e);
+        }
     }
 
     @Override
-    public Reader reader(String path) throws IOException {
-        return Files.newBufferedReader(directory.resolve(path), charset);
+    public Reader reader(String path) {
+        try {
+            return Files.newBufferedReader(directory.resolve(path), charset);
+        } catch (IOException e) {
+            throw new TransportException(this, e);
+        }
     }
 
     @Override
@@ -94,11 +112,15 @@ public class FilesystemTransport implements Transport {
         if (readonly) {
             throw new TransportException("Read-only transport - ignore delete of " + path);
         }
-        // Actually, the delete method is not deleting the file, so we're keeping it consistent.
+        // TODO implement
     }
 
-    // Main method for testing purposes
-    public static void main(String[] args) {
-        // You can add some tests here if you'd like
+    @Override
+    public String toString() {
+        return "FilesystemTransport{" +
+                "directory=" + directory +
+                ", readonly=" + readonly +
+                ", charset=" + charset +
+                '}';
     }
 }

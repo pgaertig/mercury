@@ -4,7 +4,10 @@ import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,8 +16,11 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class HashCacheTest {
 
+    @Mock
+    Consumer<String> consumer;
     private HashCache cache;
 
     @BeforeEach
@@ -24,7 +30,6 @@ public class HashCacheTest {
 
     @Test
     public void testHitMiss() {
-        Consumer<String> consumer = mock();
 
         //first time
         cache.hit("mm", "ps123", "p", "1", "{test: test}", consumer);
@@ -45,7 +50,6 @@ public class HashCacheTest {
 
     @Test
     public void testCollision() {
-        Consumer<String> consumer = mock();
 
         //first time
         cache.hit("mm", "ps123", "p", "1", "{test: test}", consumer);

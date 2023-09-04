@@ -87,6 +87,7 @@ PLATFORMS
   universal-java-11
   universal-java-19
   universal-java-20
+  universal-java-21
 
 DEPENDENCIES
   ftpd

@@ -7,10 +7,10 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.apache.commons.net.io.Util;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.MarkerManager;
 import org.apache.logging.log4j.io.IoBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.amitec.mercury.util.Utils;
 
 import java.io.*;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 public class FTPHelper {
 
-    private static final Logger LOG = LogManager.getLogger(FTPHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FTPHelper.class);
 
     private final FTPClient ftp;
     private String host;

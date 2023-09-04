@@ -6,21 +6,21 @@ import java.nio.charset.Charset;
 import java.util.List;
 
 public interface Transport {
-    FilesystemTransport subdir(String path, Charset charset);
+    Transport subdir(String path, Charset charset);
 
-    FilesystemTransport subdir(String path);
+    Transport subdir(String path);
 
     List<String> listFiles() throws IOException;
 
-    String read(String path, String mode) throws IOException;
+    String read(String path, String mode);
 
-    String read(String path) throws IOException;
+    String read(String path);
 
-    void write(String path, String content) throws IOException;
+    void write(String path, String content);
 
-    List<String> readlines(String path) throws IOException;
+    List<String> readlines(String path);
 
-    Reader reader(String path) throws IOException;
+    Reader reader(String path);
 
     boolean exists(String path);
 

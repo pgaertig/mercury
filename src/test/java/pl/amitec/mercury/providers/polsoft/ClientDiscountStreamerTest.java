@@ -28,11 +28,12 @@ public class ClientDiscountStreamerTest {
                 TestUtil.fileReader("polsoft/test1/rabaty.txt", Charsets.ISO_8859_2)
         );
         List<ClientWithDiscounts> list = joined.toList();
-        assertThat(list.size(), equalTo(4));
+        assertThat(list.size(), equalTo(5));
         ClientWithDiscounts c1 = list.get(0);
         ClientWithDiscounts c36 = list.get(1);
         ClientWithDiscounts c26 = list.get(2);
         ClientWithDiscounts c48 = list.get(3);
+        ClientWithDiscounts c7224 = list.get(4);
 
         assertThat(c1.getClient(), hasEntry(ClientWithDiscounts.KT_NUMER,"1"));
         assertThat(c1.getDiscounts(), aMapWithSize(5));
@@ -48,5 +49,9 @@ public class ClientDiscountStreamerTest {
 
         assertThat(c48.getClient(),hasEntry(ClientWithDiscounts.KT_NUMER, "48"));
         assertThat(c48.getDiscounts(), anEmptyMap());
+
+        assertThat(c7224.getClient(),hasEntry(ClientWithDiscounts.KT_NUMER, "7224"));
+        assertThat(c7224.getDiscounts(), anEmptyMap());
+
     }
 }

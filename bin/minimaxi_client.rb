@@ -39,10 +39,11 @@ java_import pl.amitec.mercury.transport.FilesystemTransport
 transport = FilesystemTransport.configure(config, true, 'iso-8859-2')
 #transport = Mercury::Transport::Filesystem.configure(config, readonly: true, mode: 'r:iso-8859-2:utf-8')
 #flow.sync_selected_clients(transport, source_ids)
-hashCache = pl.amitec.mercury.persistence.HashCache.new("data/mercury-hash-cache.db")
+#hashCache = pl.amitec.mercury.persistence.HashCache.new("data/mercury-hash-cache.db")
+hashCache = pl.amitec.mercury.persistence.NullCache.new
 redbayClient = pl.amitec.mercury.providers.redbay.RedbayClient.new(config)
-jobContext = pl.amitec.mercury.JobContext.new(hashCache, redbayClient, config)
+jobContext = pl.amitec.mercury.JobContext.new(hashCache, redbayClient, config, pl.amitec.mercury.providers.polsoft.SyncStats.new)
 redbayClient.session do
-  pl.amitec.mercury.providers.polsoft.ClientSync.new.sync(jobContext, transport, 1, nil, source_ids)
+  pl.amitec.mercury.providers.polsoft.ClientSync.new.sync(jobContext, transport, "1", nil, source_ids)
 end
 hashCache.close

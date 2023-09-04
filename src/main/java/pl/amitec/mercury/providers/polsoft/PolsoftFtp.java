@@ -1,8 +1,8 @@
 package pl.amitec.mercury.providers.polsoft;
 
 import org.apache.commons.net.ftp.FTPFile;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.amitec.mercury.net.FTPHelper;
 import pl.amitec.mercury.transport.FilesystemTransport;
 
@@ -19,7 +19,7 @@ import static pl.amitec.mercury.util.Utils.sha1HexDigest;
 
 public class PolsoftFtp {
 
-    private static final Logger LOG = LogManager.getLogger(PolsoftFtp.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PolsoftFtp.class);
 
     private static final String[] REQUIRED_FILES = {
             "grupy.txt", "klienci.txt", "produc.txt", "rabaty.txt",
@@ -103,7 +103,7 @@ public class PolsoftFtp {
     }
 
     // A private class to represent the state
-    private static class State {
+    static class State {
         public String rootDigest;
         public String exportDigest;
         public String contentDigest;

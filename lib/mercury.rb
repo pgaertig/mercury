@@ -34,8 +34,8 @@ module Kernel
 end
 
 module Mercury
-  java_import pl.amitec.MercuryBoot
-  MercuryBoot.new.init
+  java_import pl.amitec.mercury.MercuryApp
+  MercuryApp.new.init
 end
 
 require 'mercury/exponential_backoff'

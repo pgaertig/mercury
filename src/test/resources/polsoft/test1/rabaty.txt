@@ -16,3 +16,5 @@ kt_numer	towar_numer	towar_cena_kontrah
 26	35	5.90
 26	36	4.57
 26	53	10.61
+999999	1	0.00
+999999	2	0.00

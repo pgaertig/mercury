@@ -3,8 +3,8 @@ package pl.amitec.mercury.providers.redbay;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -16,28 +16,37 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+
+import static pl.amitec.mercury.util.StringUtils.truncate;
 
 public class RedbayClient {
 
-    private static final Logger LOG = LogManager.getLogger(RedbayClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RedbayClient.class);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final String uri;
     private final String host;
     private final String apikey;
+    private final boolean dryRun;
     private final HttpClient client;
     private final String auth1;
     private String token;
 
     public RedbayClient(Map<String, String> config) {
         this(config.get("redbay.url"), config.get("redbay.apikey"),
-                config.get("redbay.auth_id"), config.get("redbay.auth_pass"));
+                config.get("redbay.auth_id"), config.get("redbay.auth_pass"),
+                Boolean.parseBoolean(config.getOrDefault("redbay.dry_run", "false")));
+        if(dryRun) {
+            LOG.warn("Dry-run client");
+        }
     }
 
-    public RedbayClient(String uri, String apikey, String authId, String authPass) {
+    public RedbayClient(String uri, String apikey, String authId, String authPass, boolean dryRun) {
         this.uri = uri;
         this.host = URI.create(uri).getHost();
         this.apikey = apikey;
+        this.dryRun = dryRun;
         this.client = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_2)
                 .followRedirects(HttpClient.Redirect.NORMAL)
@@ -112,8 +121,8 @@ public class RedbayClient {
 
     // Orders
 
-    public Map<String, Object> getOrder(String id) {
-        return (Map<String, Object>) getJson("order/" + id, new HashMap<>()).get("object");
+    public JsonNode getOrder(String id) {
+        return getJson("order/" + id, new HashMap<>()).get("object");
     }
 
     public void confirmOrder(String id) {
@@ -122,8 +131,16 @@ public class RedbayClient {
 
     // Journal
 
-    public JsonNode getJournal(String type, boolean includeConfirmed, int limit) {
-        return getJson("journal", Map.of("type", type, "include_confirmed", includeConfirmed, "limit", limit));
+    public JsonNode getJournal(String type, boolean includeConfirmed, Integer limit) {
+        var params = new HashMap<String, Object>();
+        params.put("type", type);
+        if(includeConfirmed) {
+            params.put("include_confirmed", true);
+        }
+        if(limit != null) {
+            params.put("limit", limit);
+        }
+        return getJson("journal", params);
     }
 
     public JsonNode getOrdersJournal() {
@@ -137,6 +154,11 @@ public class RedbayClient {
     public JsonNode getWarehouse(String source, String sourceId) {
         var result = getJson("warehouses", Map.of("source", source, "source_id", sourceId));
         return result.path("list").get(0);
+    }
+
+    public Optional<String> getWarehouseId(String source, String sourceId) {
+        return Optional.ofNullable(getWarehouse(source, sourceId)).map(
+                (json) -> json.get("id").asText());
     }
 
     public void addWarehouse(String json) {
@@ -155,6 +177,10 @@ public class RedbayClient {
 
     protected void postJson(String apiCall, String json) {
         String url = uri + "/" + apiCall;
+        if(dryRun) {
+            LOG.info("Dry-run, ignore POST to {} with body {}", url, truncate(json, 120, true));
+            return;
+        }
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .headers("Accept", "application/json",
@@ -163,24 +189,26 @@ public class RedbayClient {
                         "Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
-        HttpResponse<String> response = null;
+
         try {
-            response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                LOG.debug("+Redbay: POST " + url + " success " + response.statusCode() + ": " + response.body());
+            } else {
+                throw new RuntimeException("!Redbay: POST " + url + " failure " + response.statusCode() + ": " + response.body());
+            }
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
 
-        if (response.statusCode() == 200) {
-            LOG.debug("+Redbay: POST " + url + " success " + response.statusCode() + ": " + response.body());
-        } else {
-            throw new RuntimeException("!Redbay: POST " + url + " failure " + response.statusCode() + ": " + response.body());
-        }
     }
 
     protected void putJson(String apiCall, String json) {
         String url = uri + "/" + apiCall;
+        if(dryRun) {
+            LOG.info("Dry-run, ignore POST to {} with body {}", url, truncate(json, 40, true));
+            return;
+        }
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .headers("Accept", "application/json",
@@ -189,18 +217,17 @@ public class RedbayClient {
                         "Content-Type", "application/json")
                 .PUT(HttpRequest.BodyPublishers.ofString(json))
                 .build();
-        HttpResponse<String> response = null;
         try {
-            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() < 300) {
+                 System.out.println("+Redbay: POST " + url + " success " + response.statusCode() + ": " + response.body());
+            } else {
+                throw new RuntimeException("!Redbay: POST " + url + " failure " + response.statusCode() + ": " + response.body());
+            }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
 
-        if (response.statusCode() < 300) {
-            System.out.println("+Redbay: POST " + url + " success " + response.statusCode() + ": " + response.body());
-        } else {
-            throw new RuntimeException("!Redbay: POST " + url + " failure " + response.statusCode() + ": " + response.body());
-        }
     }
 
 
@@ -243,7 +270,7 @@ public class RedbayClient {
         }
 
         if (response.statusCode() == 200) {
-            System.out.println("+Redbay: GET " + url + " success " + response.statusCode() + ": " + response.body());
+            LOG.debug("+Redbay: GET " + url + " success " + response.statusCode() + ": " + response.body());
             try {
                 return OBJECT_MAPPER.readTree(response.body());
             } catch (JsonProcessingException e) {

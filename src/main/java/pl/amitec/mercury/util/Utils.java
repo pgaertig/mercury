@@ -1,9 +1,15 @@
 package pl.amitec.mercury.util;
 
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 
 public class Utils {
 
@@ -35,17 +41,13 @@ public class Utils {
         return map;
     }
 
-    public static Map<String, Object> orderedMapOfStrings(Object... kvs){
+    public static Map<String, String> orderedMapOfStrings(String... kvs){
         if(kvs.length % 2 != 0) {
             throw new IllegalArgumentException("KVs must have even number of elements");
         }
-        var map = new LinkedHashMap<String, Object>(kvs.length / 2, 1);
+        var map = new LinkedHashMap<String, String>(kvs.length / 2, 1);
         for (int i=0 ; i<kvs.length ; i+=2) {
-            if(kvs[i] instanceof String key) {
-                map.put(key, kvs[i + 1]);
-            } else {
-                throw new IllegalArgumentException("Keys must be strings: " + kvs[i]);
-            }
+            map.put(kvs[i], kvs[i + 1]);
         }
         return map;
     }
@@ -53,5 +55,48 @@ public class Utils {
     public static <K, V> Map.Entry<K, V> entry(K k, V v) {
         Objects.requireNonNull(k);
         return new LinkedHashMap.SimpleEntry<>(k, v);
+    }
+
+    public static ObjectNode jsonObject() {
+        return JsonNodeFactory.instance.objectNode();
+    }
+
+    public static ObjectNode jsonObject(String... kvs) {
+        if(kvs.length % 2 != 0) {
+            throw new IllegalArgumentException("KVs must have even number of elements");
+        }
+        var node = jsonObject();
+
+        for (int i=0 ; i<kvs.length ; i+=2) {
+            node.put(kvs[i], kvs[i+1]);
+        }
+        return node;
+    }
+    public static ObjectNode jsonObjectWith(Consumer<ObjectNode> obj) {
+        var node = JsonNodeFactory.instance.objectNode();
+        if(obj != null) {
+            obj.accept(node);
+        }
+        return node;
+    }
+
+    public static <T extends JsonNode> ArrayNode jsonArray(T... objs) {
+        return jsonList(List.of(objs));
+    }
+
+    public static <T extends JsonNode> ArrayNode jsonList(List<T> elements) {
+        return jsonArray().addAll(elements);
+    }
+
+    public static ArrayNode jsonArray() {
+        return JsonNodeFactory.instance.arrayNode();
+    }
+
+    public static ArrayNode jsonArrayWith(Consumer<ArrayNode> arr) {
+        var node = JsonNodeFactory.instance.arrayNode();
+        if(arr != null) {
+            arr.accept(node);
+        }
+        return node;
     }
 }

@@ -9,6 +9,10 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Polish post codes parser
+ * Data source <a href="http://www.kody-pocztowe.dokladnie.com/">Baza kodów pocztowych (CC BY-SA 3.0)</a>
+ */
 public class PostCodes {
     private static PostCodes INSTANCE;
 
@@ -18,7 +22,6 @@ public class PostCodes {
                 .setDelimiter(';')
                 .setHeader()
                 .build();
-        this.getClass().getResource("dict/kody.csv.zip");
 
         ZipUtil.readResourceStream("/dict/kody.csv.zip", "kody.csv",
                 (csv) -> {

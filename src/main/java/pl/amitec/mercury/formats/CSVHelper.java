@@ -3,6 +3,8 @@ package pl.amitec.mercury.formats;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -13,36 +15,38 @@ import java.util.stream.Collectors;
 
 public class CSVHelper {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CSVHelper.class);
+
     private final CSVFormat csvFormat;
 
     public CSVHelper() {
-        csvFormat = CSVFormat.TDF.builder().setSkipHeaderRecord(true).build();
+        csvFormat = CSVFormat.TDF.builder()
+                .setQuote(null)
+                .setHeader()
+                .setSkipHeaderRecord(true)
+                .setAllowMissingColumnNames(true)
+                .build();
     }
 
     public Iterable<Map<String, String>> streamCSV(Reader lines) throws IOException {
         CSVParser parser = csvFormat.parse(lines);
 
-        return new Iterable<Map<String, String>>() {
+        return () -> new Iterator<>() {
+            private final Iterator<CSVRecord> recordIterator = parser.iterator();
+
             @Override
-            public Iterator<Map<String, String>> iterator() {
-                return new Iterator<Map<String, String>>() {
-                    private final Iterator<CSVRecord> recordIterator = parser.iterator();
+            public boolean hasNext() {
+                return recordIterator.hasNext();
+            }
 
-                    @Override
-                    public boolean hasNext() {
-                        return recordIterator.hasNext();
-                    }
-
-                    @Override
-                    public Map<String, String> next() {
-                        CSVRecord record = recordIterator.next();
-                        Map<String, String> map = new HashMap<>();
-                        for (String header : parser.getHeaderNames()) {
-                            map.put(header, record.get(header));
-                        }
-                        return map;
-                    }
-                };
+            @Override
+            public Map<String, String> next() {
+                CSVRecord record = recordIterator.next();
+                Map<String, String> map = new HashMap<>();
+                for (String header : parser.getHeaderNames()) {
+                    map.put(header, record.get(header));
+                }
+                return map;
             }
         };
     }

@@ -3,8 +3,8 @@ package pl.amitec.mercury.providers.polsoft;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -16,7 +16,7 @@ import java.util.stream.StreamSupport;
 
 public class ClientDiscountStreamer {
 
-    private static final Logger LOG = LogManager.getLogger(ClientDiscountStreamer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientDiscountStreamer.class);
 
     /**
      * Returns wrapper stream of clients with discounts from CSV formatted reader input.
@@ -41,7 +41,8 @@ public class ClientDiscountStreamer {
                 Collectors.toMap(
                         client -> client.get(ClientWithDiscounts.KT_NUMER), //key - company ID
                         client -> client, // company - value
-                        (existing, replacement) -> replacement // in case of conflict
+                        (existing, replacement) -> replacement, // in case of conflict
+                        LinkedHashMap::new
                 )
         );
 
@@ -51,35 +52,55 @@ public class ClientDiscountStreamer {
 
         return StreamSupport.stream(new Spliterators.AbstractSpliterator<ClientWithDiscounts>(Long.MAX_VALUE, Spliterator.ORDERED) {
             private CSVRecord buffer = null;
+            private final Queue<Map<String,String>> clientsQueue = new LinkedList<>();
+            private final Set<String> unknownClients = new LinkedHashSet<>();
             @Override
             public boolean tryAdvance(Consumer<? super ClientWithDiscounts> action) {
                 if (buffer == null && !discountIterator.hasNext()) {
                     if(!clientsMap.isEmpty()) {
                         LOG.warn("Clients without discounts, count={}", clientsMap.size());
-                        clientsMap.forEach((id, client) -> action.accept(new ClientWithDiscounts(client)));
-                        clientsMap.clear(); //required as tryAdvance will attempt one more time
+                        clientsQueue.addAll(clientsMap.values());
+                        clientsMap.clear();
                     }
-                     return false;
+                    if(clientsQueue.isEmpty()) {
+                        if(!unknownClients.isEmpty()) {
+                            LOG.warn("Found discounts without clients, clientIds={}", unknownClients);
+                        }
+                        return false;
+                    } else {
+                        //only once as tryAdvance passes just one to final consumer
+                        action.accept(new ClientWithDiscounts(clientsQueue.poll()));
+                        return true;
+                    }
                 }
 
                 ClientWithDiscounts clientWithDiscounts = null;
 
                 if (buffer != null) {
                     // first in group, consumed by previous group scan
-                    clientWithDiscounts = new ClientWithDiscounts(
-                            clientsMap.remove(buffer.get(ClientWithDiscounts.KT_NUMER)));
-                    clientWithDiscounts.addDiscount(buffer);
+                    String clientId = buffer.get(ClientWithDiscounts.KT_NUMER);
+                    Map<String, String> client = clientsMap.remove(clientId);
+                    if(client == null) {
+                        unknownClients.add(clientId);
+                    } else {
+                        clientWithDiscounts = new ClientWithDiscounts(client);
+                        clientWithDiscounts.addDiscount(buffer);
+                    }
                     buffer = null;
                 }
 
                 while (discountIterator.hasNext()) {
                     CSVRecord discount = discountIterator.next();
-                    if (clientWithDiscounts == null) {
-                        // first in group
-                        clientWithDiscounts = new ClientWithDiscounts(
-                                clientsMap.remove(discount.get(ClientWithDiscounts.KT_NUMER)));
+                    String clientId = discount.get(ClientWithDiscounts.KT_NUMER);
+                    if (clientWithDiscounts == null) { // first in group
+                        var client = clientsMap.remove(clientId);
+                        if (client == null) {
+                            unknownClients.add(clientId);
+                            continue;
+                        }
+                        clientWithDiscounts = new ClientWithDiscounts(client);
                         clientWithDiscounts.addDiscount(discount);
-                    } else if (discount.get(ClientWithDiscounts.KT_NUMER).equals(
+                    } else if (clientId.equals(
                             clientWithDiscounts.getClient().get(ClientWithDiscounts.KT_NUMER))) {
                         // next in group matching
                         clientWithDiscounts.addDiscount(discount);
@@ -89,8 +110,9 @@ public class ClientDiscountStreamer {
                         break;
                     }
                 }
-
-                action.accept(clientWithDiscounts);
+                if(clientWithDiscounts != null) {
+                    action.accept(clientWithDiscounts);
+                }
                 return true;
             }
         }, false);

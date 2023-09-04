@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.sqlite.SQLiteDataSource;
 import pl.amitec.mercury.util.Utils;
 
 import java.nio.file.Paths;
@@ -22,8 +23,8 @@ public class HashCache implements Cache {
 
     public HashCache(String path) {
         this.file = path;
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("org.sqlite.JDBC");
+        SQLiteDataSource dataSource = new SQLiteDataSource();
+        //ds.setLogWriter();
         dataSource.setUrl("jdbc:sqlite:" + file);
         this.jdbcTemplate = new JdbcTemplate(dataSource);
 
@@ -42,7 +43,7 @@ public class HashCache implements Cache {
                 tenant, source, resource, key);
 
         if (result != null && !result.isEmpty()) {
-            var rec = result.get(0);
+            var rec = result.getFirst();
             if (hash.equals(rec.get("data_hash"))) {
                 logger.debug("Hit {}", rec);
                 jdbcTemplate.update(
