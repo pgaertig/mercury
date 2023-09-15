@@ -1,4 +1,4 @@
-package pl.amitec.mercury.providers.redbay;
+package pl.amitec.mercury.providers.bitbee;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;

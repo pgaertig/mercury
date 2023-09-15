@@ -1,11 +1,11 @@
-package pl.amitec.mercury.providers.redbay;
+package pl.amitec.mercury.providers.bitbee;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record RbAuthTokenResponse (
+public record AuthTokenResponse(
         String token,
         boolean validate,
         String redirect,

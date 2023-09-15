@@ -6,10 +6,9 @@ import pl.amitec.mercury.JobContext;
 import pl.amitec.mercury.formats.Charsets;
 import pl.amitec.mercury.persistence.Cache;
 import pl.amitec.mercury.persistence.HashCache;
-import pl.amitec.mercury.providers.redbay.RedbayClient;
+import pl.amitec.mercury.providers.bitbee.BitbeeClient;
 import pl.amitec.mercury.transport.FilesystemTransport;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 
@@ -18,18 +17,18 @@ public class PsFlow {
     private static final Logger LOG = LoggerFactory.getLogger(PsFlow.class);
 
     private Map<String, String> config;
-    private final RedbayClient redbayClient;
+    private final BitbeeClient bitbeeClient;
     private final Cache cache;
 
     public static PsFlow configure(Map<String, String> config) {
-        RedbayClient redbayClient = new RedbayClient(config);
+        BitbeeClient bitbeeClient = new BitbeeClient(config);
         Cache cache = new HashCache("data/mercury-hash-cache.db");
-        return new PsFlow(config, redbayClient, cache);
+        return new PsFlow(config, bitbeeClient, cache);
     }
 
-    public PsFlow(Map<String, String> config, RedbayClient redbayClient, Cache cache) {
+    public PsFlow(Map<String, String> config, BitbeeClient bitbeeClient, Cache cache) {
         this.config = config;
-        this.redbayClient = redbayClient;
+        this.bitbeeClient = bitbeeClient;
         this.cache = cache;
     }
 
@@ -72,10 +71,10 @@ public class PsFlow {
 
     private void processOrders() {
         JobContext ctx = new JobContext(cache,
-                redbayClient, config, new SyncStats());
+                bitbeeClient, config, new SyncStats());
         var writeTransport = FilesystemTransport.configure(config, false, Charsets.ISO_8859_2);
         try {
-            redbayClient.session(() -> {
+            bitbeeClient.session(() -> {
                 new OrderSync().sync(ctx, writeTransport, config.get("polsoft.department"));
             });
         } catch (Exception e) {
@@ -85,8 +84,8 @@ public class PsFlow {
 
     private void sync(PolsoftFtp.State state) {
         try {
-            redbayClient.session(() -> {
-                JobContext ctx = new JobContext(cache, redbayClient, config, new SyncStats());
+            bitbeeClient.session(() -> {
+                JobContext ctx = new JobContext(cache, bitbeeClient, config, new SyncStats());
                 new VariantSync().sync(ctx, state.transport, "1",null);
                 new ClientSync().sync(ctx, state.transport, "1", null);
             });

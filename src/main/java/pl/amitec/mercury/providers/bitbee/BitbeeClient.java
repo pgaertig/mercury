@@ -1,4 +1,4 @@
-package pl.amitec.mercury.providers.redbay;
+package pl.amitec.mercury.providers.bitbee;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -20,9 +20,9 @@ import java.util.Optional;
 
 import static pl.amitec.mercury.util.StringUtils.truncate;
 
-public class RedbayClient {
+public class BitbeeClient {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RedbayClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BitbeeClient.class);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final String uri;
@@ -33,16 +33,16 @@ public class RedbayClient {
     private final String auth1;
     private String token;
 
-    public RedbayClient(Map<String, String> config) {
-        this(config.get("redbay.url"), config.get("redbay.apikey"),
-                config.get("redbay.auth_id"), config.get("redbay.auth_pass"),
-                Boolean.parseBoolean(config.getOrDefault("redbay.dry_run", "false")));
+    public BitbeeClient(Map<String, String> config) {
+        this(config.get("bitbee.url"), config.get("bitbee.apikey"),
+                config.get("bitbee.auth_id"), config.get("bitbee.auth_pass"),
+                Boolean.parseBoolean(config.getOrDefault("bitbee.readonly", "false")));
         if(dryRun) {
             LOG.warn("Dry-run client");
         }
     }
 
-    public RedbayClient(String uri, String apikey, String authId, String authPass, boolean dryRun) {
+    public BitbeeClient(String uri, String apikey, String authId, String authPass, boolean dryRun) {
         this.uri = uri;
         this.host = URI.create(uri).getHost();
         this.apikey = apikey;
@@ -71,7 +71,7 @@ public class RedbayClient {
                 .GET()
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        RbAuthTokenResponse tokenResponse = OBJECT_MAPPER.readValue(response.body(), RbAuthTokenResponse.class);
+        AuthTokenResponse tokenResponse = OBJECT_MAPPER.readValue(response.body(), AuthTokenResponse.class);
 
         if (response.statusCode() == 200) {
             token = tokenResponse.token();
@@ -193,9 +193,9 @@ public class RedbayClient {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
-                LOG.debug("+Redbay: POST " + url + " success " + response.statusCode() + ": " + response.body());
+                LOG.debug("+Bitbee: POST " + url + " success " + response.statusCode() + ": " + response.body());
             } else {
-                throw new RuntimeException("!Redbay: POST " + url + " failure " + response.statusCode() + ": " + response.body());
+                throw new RuntimeException("!Bitbee: POST " + url + " failure " + response.statusCode() + ": " + response.body());
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
@@ -220,9 +220,9 @@ public class RedbayClient {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() < 300) {
-                 System.out.println("+Redbay: POST " + url + " success " + response.statusCode() + ": " + response.body());
+                 System.out.println("+Bitbee: POST " + url + " success " + response.statusCode() + ": " + response.body());
             } else {
-                throw new RuntimeException("!Redbay: POST " + url + " failure " + response.statusCode() + ": " + response.body());
+                throw new RuntimeException("!Bitbee: POST " + url + " failure " + response.statusCode() + ": " + response.body());
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
@@ -270,14 +270,14 @@ public class RedbayClient {
         }
 
         if (response.statusCode() == 200) {
-            LOG.debug("+Redbay: GET " + url + " success " + response.statusCode() + ": " + response.body());
+            LOG.debug("+Bitbee: GET " + url + " success " + response.statusCode() + ": " + response.body());
             try {
                 return OBJECT_MAPPER.readTree(response.body());
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
         } else {
-            throw new RuntimeException("!Redbay: GET " + url + " failure " + response.statusCode() + ": " + response.body());
+            throw new RuntimeException("!Bitbee: GET " + url + " failure " + response.statusCode() + ": " + response.body());
         }
     }
 

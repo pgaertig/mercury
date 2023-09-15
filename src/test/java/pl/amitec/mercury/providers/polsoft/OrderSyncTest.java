@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.amitec.mercury.JobContext;
 import pl.amitec.mercury.persistence.HashCache;
-import pl.amitec.mercury.providers.redbay.RedbayClient;
+import pl.amitec.mercury.providers.bitbee.BitbeeClient;
 import pl.amitec.mercury.transport.Transport;
 
 import java.io.IOException;
@@ -27,7 +27,7 @@ class OrderSyncTest {
     @Mock
     HashCache hashCache;
     @Mock
-    RedbayClient rbc;
+    BitbeeClient rbc;
     @Mock
     Transport deptDir;
 

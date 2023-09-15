@@ -35,7 +35,7 @@ public class VariantSync {
             var producers = csvHelper.mapCSV(producersReader, "prd_numer", "prd_nazwa");
             var groups = csvHelper.mapCSV(groupsReader, "categories_id", "categories_name");
 
-            Optional<String> warehouseId = jobContext.redbayClient().getWarehouseId("polsoft", dept);
+            Optional<String> warehouseId = jobContext.bitbeeClient().getWarehouseId("polsoft", dept);
             warehouseId.orElseThrow(); //TODO create warehouses
 
             var variantSourceIds = new HashSet<String>();
@@ -135,7 +135,7 @@ public class VariantSync {
             jobContext.hashCache().hit(
                     jobContext.getTenant(), "ps", "p", String.format("%s:%s", dept, sourceId), json, (data) -> {
                         LOG.debug("JSON: {}", json);
-                        jobContext.redbayClient().importVariant(json);
+                        jobContext.bitbeeClient().importVariant(json);
                     });
             jobContext.syncStats().incEntries();
 

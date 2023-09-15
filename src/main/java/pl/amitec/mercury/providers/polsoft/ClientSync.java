@@ -102,7 +102,7 @@ public class ClientSync implements PsCommonSync {
             var hit = jobContext.hashCache().hit(
                     jobContext.getTenant(), "ps", "c", String.format("%s:%s", dept, id), json, (data) -> {
                         LOG.debug("JSON: {}", json);
-                        jobContext.redbayClient().importCompany(json);
+                        jobContext.bitbeeClient().importCompany(json);
                     });
             if(hit) {
                 jobContext.syncStats().incCached();

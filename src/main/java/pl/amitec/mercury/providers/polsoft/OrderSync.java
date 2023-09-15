@@ -24,7 +24,7 @@ public class OrderSync {
     private static final Pattern UNIQUE_NUMBER_PATTERN = Pattern.compile("^RB0*(\\d+)-0*(\\d+)$");
     public void sync(JobContext ctx, Transport transport, String dept) {
         Transport importDir = transport.subdir(String.format("IMPORT_ODDZ_%s", dept));
-        ArrayNode journalOrders = (ArrayNode) ctx.redbayClient().getOrdersJournal().path("list");
+        ArrayNode journalOrders = (ArrayNode) ctx.bitbeeClient().getOrdersJournal().path("list");
         if(!journalOrders.isArray()) {
             throw new RuntimeException("Orders is not array");
         }
@@ -40,7 +40,7 @@ public class OrderSync {
     private static boolean processOrder(JobContext ctx, JsonNode item, Transport importDir) {
         var journalId = item.get("id").asText();
         var orderId = item.get("objectId").asText();
-        var order = ctx.redbayClient().getOrder(orderId);
+        var order = ctx.bitbeeClient().getOrder(orderId);
 
         if(order == null) {
             LOG.info("Order {} not found in backend", orderId);
@@ -111,7 +111,7 @@ public class OrderSync {
             LOG.debug("Order {} has no positions for source {}", orderId, "polsoft"); // TODO multisource
         }
 
-        ctx.redbayClient().confirmJournalItem(journalId);
+        ctx.bitbeeClient().confirmJournalItem(journalId);
         return true;
     }
 

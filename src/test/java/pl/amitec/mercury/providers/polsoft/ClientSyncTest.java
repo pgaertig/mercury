@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import pl.amitec.mercury.JobContext;
 import pl.amitec.mercury.formats.Charsets;
 import pl.amitec.mercury.persistence.HashCache;
-import pl.amitec.mercury.providers.redbay.RedbayClient;
+import pl.amitec.mercury.providers.bitbee.BitbeeClient;
 import pl.amitec.mercury.transport.Transport;
 
 import java.io.IOException;
@@ -23,7 +23,8 @@ import static pl.amitec.mercury.TestUtil.fileReader;
 public class ClientSyncTest {
 
     @Mock HashCache hashCache;
-    @Mock RedbayClient rbc;
+    @Mock
+    BitbeeClient rbc;
     @Mock Transport deptDir;
 
     JobContext jobContext;

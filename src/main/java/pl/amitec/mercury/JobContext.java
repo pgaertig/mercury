@@ -1,16 +1,15 @@
 package pl.amitec.mercury;
 
 import pl.amitec.mercury.persistence.Cache;
-import pl.amitec.mercury.persistence.HashCache;
 import pl.amitec.mercury.providers.polsoft.SyncStats;
-import pl.amitec.mercury.providers.redbay.RedbayClient;
+import pl.amitec.mercury.providers.bitbee.BitbeeClient;
 
 import java.util.Map;
 import java.util.Objects;
 
 public record JobContext(
         Cache hashCache,
-        RedbayClient redbayClient,
+        BitbeeClient bitbeeClient,
         Map<String, String> config,
         SyncStats syncStats
 ) {
