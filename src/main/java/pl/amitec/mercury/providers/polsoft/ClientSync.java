@@ -111,6 +111,7 @@ public class ClientSync implements PsCommonSync {
             }
         } catch (JsonProcessingException e) {
             jobContext.syncStats().incFailed();
+            LOG.error(String.format("Failed processing Client: %s", id), e);
             throw new RuntimeException(e);
         }
         return true;

@@ -2,13 +2,14 @@
 <configuration>
 
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+
     <appender name="FILE-THREAD" class="ch.qos.logback.classic.sift.SiftingAppender">
 
         <!-- This is MDC value -->
         <!-- We will assign a value to 'tenant' via Java code -->
         <discriminator>
-            <key>tenant</key>
-            <defaultValue>root</defaultValue>
+            <key>tenant-log</key>
+            <defaultValue>log/mercury.</defaultValue>
         </discriminator>
 
         <sift>
@@ -16,8 +17,6 @@
             <!-- A standard RollingFileAppender, the log file is based on 'logFileName' at runtime  -->
             <appender name="FILE-${tenant}"
                       class="ch.qos.logback.core.rolling.RollingFileAppender">
-                <file>log/tenant-${tenant}.log</file>
-
                 <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
                     <Pattern>
                         ${FILE_LOG_PATTERN}
@@ -25,28 +24,39 @@
                 </encoder>
 
                 <rollingPolicy
-                        class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-                    <FileNamePattern>
-                        log/tenant-${tenant}.%i.log.gz
-                    </FileNamePattern>
-                    <MinIndex>1</MinIndex>
-                    <MaxIndex>10</MaxIndex>
+                        class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <fileNamePattern>
+                        ${tenant-log}%d{yyyy-MM-dd}.log.gz
+                    </fileNamePattern>
+                    <maxHistory>14</maxHistory>
                 </rollingPolicy>
-
-                <triggeringPolicy
-                        class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-                    <MaxFileSize>10MB</MaxFileSize>
-                </triggeringPolicy>
-
             </appender>
-
         </sift>
+    </appender>
+
+    <appender name="ERROR-LOG-FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>
+                ${FILE_LOG_PATTERN}
+            </Pattern>
+        </encoder>
+
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>
+                log/mercury-error.%d{yyyy-MM-dd}.log.gz
+            </fileNamePattern>
+        </rollingPolicy>
+
     </appender>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
-                log/tenant-%X{tenant:-root}.log|${CONSOLE_LOG_PATTERN}
+                %X{tenant:--}|${CONSOLE_LOG_PATTERN}
             </Pattern>
         </layout>
     </appender>
@@ -54,10 +64,12 @@
     <logger name="pl.amitec.mercury" level="debug"
             additivity="false">
         <appender-ref ref="FILE-THREAD" />
+        <appender-ref ref="ERROR-LOG-FILE" />
         <appender-ref ref="STDOUT" />
     </logger>
 
     <root level="error">
+        <appender-ref ref="ERROR-LOG-FILE" />
         <appender-ref ref="STDOUT" />
     </root>
 

@@ -34,6 +34,7 @@ public class PolsoftFtp {
     private String user;
     private String password;
     private final String cacheDir;
+    private final Boolean readonly;
 
     public static PolsoftFtp configure(Map<String, String> properties) {
         return new PolsoftFtp(
@@ -41,16 +42,18 @@ public class PolsoftFtp {
             Integer.parseInt(properties.getOrDefault("ftp.port", "21")),
             properties.getOrDefault("ftp.user", "anonymous"),
             properties.getOrDefault("ftp.password", "anonymous"),
-            properties.getOrDefault("ftp.cacheDir", "data/ftp")
+            properties.getOrDefault("ftp.cacheDir", "data/ftp"),
+            Boolean.parseBoolean(properties.getOrDefault("ftp.readonly", "false"))
         );
     }
 
-    public PolsoftFtp(String host, int port, String user, String password, String cacheDir) {
+    public PolsoftFtp(String host, int port, String user, String password, String cacheDir, Boolean readonly) {
         this.host = host;
         this.port = port;
         this.user = user;
         this.password = password;
         this.cacheDir = cacheDir;
+        this.readonly = readonly;
     }
 
     public void withConnected(Consumer<FTPHelper> action) throws Exception {
@@ -205,6 +208,10 @@ public class PolsoftFtp {
                     if (Files.isRegularFile(filePath)) {
                         try (FileInputStream inputStream = new FileInputStream(filePath.toFile())) {
                             String remoteFile = remoteDir + "/" + filePath.getFileName().toString();
+                            if(readonly) {
+                                LOG.warn("readonly=true, ignoring upload local:{} to ftp:{}", filePath, remoteFile);
+                                continue;
+                            }
                             LOG.info("Uploading local:{} to ftp:{}", filePath, remoteFile);
                             boolean done = ftp.uploadFile(inputStream, remoteFile);
                             if (done) {
@@ -239,7 +246,11 @@ public class PolsoftFtp {
 
     public void ensureDirectoryExists(Path directory) throws IOException {
         if (!Files.exists(directory)) {
-            Files.createDirectories(directory);
+            if(readonly) {
+                LOG.warn("readonly=true, not creating directories {}", directory);
+            } else {
+                Files.createDirectories(directory);
+            }
         }
     }
 }

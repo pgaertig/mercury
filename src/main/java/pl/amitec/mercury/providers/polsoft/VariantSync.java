@@ -1,6 +1,5 @@
 package pl.amitec.mercury.providers.polsoft;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
@@ -10,7 +9,10 @@ import pl.amitec.mercury.formats.CSVHelper;
 import pl.amitec.mercury.transport.Transport;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import static pl.amitec.mercury.util.Utils.*;
 
@@ -135,14 +137,14 @@ public class VariantSync {
                         LOG.debug("JSON: {}", json);
                         jobContext.redbayClient().importVariant(json);
                     });
-            jobContext.syncStats().entries();
+            jobContext.syncStats().incEntries();
 
             return Optional.of(sourceId);
-        } catch (JsonProcessingException e) {
-            jobContext.syncStats().failed();
-            throw new RuntimeException(e); //TODO
+        } catch (Exception e) {
+            jobContext.syncStats().incFailed();
+            LOG.error(String.format("Failed processing Variant: %s", code), e);
+            return Optional.empty();
         }
-
     }
 
 

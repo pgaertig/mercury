@@ -40,7 +40,7 @@ public class PsFlow {
 
             try {
                 source.syncDirToRemote("data/IMPORT_ODDZ_1", "data/IMPORT_ODDZ_1-sent", "/IMPORT_ODDZ_1");
-            } catch (IOException e) {
+            } catch (Exception e) {
                 LOG.error(
                         String.format("Failed to sync dir to remote for %s", source), e);
             }
@@ -79,7 +79,7 @@ public class PsFlow {
                 new OrderSync().sync(ctx, writeTransport, config.get("polsoft.department"));
             });
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            LOG.error("Failed to sync orders", e);
         }
     }
 
@@ -91,7 +91,8 @@ public class PsFlow {
                 new ClientSync().sync(ctx, state.transport, "1", null);
             });
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            LOG.error(
+                    String.format("Failed to sync variants/clients, state: %s", state), e);
         }
     }
 }

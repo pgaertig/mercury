@@ -18,6 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class OrderSync {
+    public static final DateTimeFormatter ADDED_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
     private static final Logger LOG = LoggerFactory.getLogger(OrderSync.class);
 
     private static final Pattern UNIQUE_NUMBER_PATTERN = Pattern.compile("^RB0*(\\d+)-0*(\\d+)$");
@@ -61,17 +62,16 @@ public class OrderSync {
                 .build();
 
         StringBuilder headerData = new StringBuilder();
+        LocalDateTime addedAt = LocalDateTime.parse(order.get("added").get("date").asText(), ADDED_DATE_FORMAT);
         try(CSVPrinter headerCsv = outputFormat.print(headerData)) {
             headerCsv.printRecord("nrfak", "rodzdok", "nrodb", "idhandl", "datasp", "uwagi");
-            var addedDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
-            LocalDateTime addedAt = LocalDateTime.parse(order.get("added").get("date").asText(), addedDateFormat);
             headerCsv.printRecord(
                     orderNo,
                     "ZA",
                     order.get("contact").get("company").get("sourceid").asText(),
                     "0",
                     addedAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-                    ""
+                    order.get("comment").asText().replaceAll("[\n\r\t]", " ")
             );
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -90,7 +90,7 @@ public class OrderSync {
                         "0",
                         position.get("quantity").asText(),
                         position.get("price").asText(),
-                        "", // TODO comments
+                        position.get("comment").asText(),
                         "0"
                 );
                 sources.add(position.get("variantSource").asText());
@@ -103,7 +103,7 @@ public class OrderSync {
             System.out.println(headerData.toString());
             System.out.println(positionsData.toString());
 
-            String marker = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + "." + sequenceNo;
+            String marker = addedAt.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + "." + sequenceNo;
             importDir.write("N" + marker + ".txt", headerData.toString());
             importDir.write("P" + marker + ".txt", positionsData.toString());
             importDir.write("f" + marker + ".txt", "");

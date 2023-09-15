@@ -26,7 +26,7 @@ public record SyncStats(
         cached.incrementAndGet();
     }
 
-    public void incFailed() {
-        failed.incrementAndGet();
+    public int incFailed() {
+        return failed.incrementAndGet();
     }
 }
