@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import pl.amitec.mercury.providers.polsoft.PsFlow;
+import pl.amitec.mercury.providers.redbay.RedbayToBitbeePlan;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -58,6 +59,22 @@ public class MercuryApp implements ApplicationListener<ContextRefreshedEvent> {
             }
             PsFlow.configure(propertiesToMap(props)).watch();
         });
+
+        /*var source = "er_rb_1";
+        var pipeline = Thread.ofVirtual().name(source).unstarted(() -> {
+            MDC.put("tenant", source);
+            MDC.put("tenant-log", String.format("log/sources/%s/", source));
+            LOG.info("Redbay plugin for tenant: er");
+            Properties props = new Properties();
+            try {
+                props.load(new FileReader(
+                        String.format("data/sources/%s.properties", source)));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            new RedbayToBitbeePlan().configure(propertiesToMap(props)).run();
+        });*/
+
         pipeline.start();
     }
 }

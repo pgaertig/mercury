@@ -1,10 +1,20 @@
-package pl.amitec.mercury.providers.bitbee;
+package pl.amitec.mercury.clients.bitbee;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.amitec.mercury.clients.bitbee.types.Tax;
+import pl.amitec.mercury.clients.bitbee.types.Warehouse;
+import pl.amitec.mercury.clients.bitbee.types.ListContainer;
+import pl.amitec.mercury.providers.bitbee.AuthTokenResponse;
 
 import java.io.IOException;
 import java.net.URI;
@@ -13,15 +23,16 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static pl.amitec.mercury.util.StringUtils.truncate;
 
 public class BitbeeClient {
 
+    public static final ObjectMapper JSON_MAPPER = JsonMapper.builder()
+            .configure(MapperFeature.ALLOW_COERCION_OF_SCALARS, false)
+            .addModule(new Jdk8Module())
+            .build();
     private static final Logger LOG = LoggerFactory.getLogger(BitbeeClient.class);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -151,36 +162,83 @@ public class BitbeeClient {
         putJson("journal/" + id + "/confirm", "");
     }
 
-    public JsonNode getWarehouse(String source, String sourceId) {
-        var result = getJson("warehouses", Map.of("source", source, "source_id", sourceId));
-        return result.path("list").get(0);
+    public List<Tax> getTaxes() {
+        return getList("taxes", new TypeReference<>() {});
     }
 
-    public Optional<String> getWarehouseId(String source, String sourceId) {
-        return Optional.ofNullable(getWarehouse(source, sourceId)).map(
-                (json) -> json.get("id").asText());
+    public List<Warehouse> getWarehouses() {
+        return getList("warehouses", new TypeReference<>() {});
     }
 
-    public void addWarehouse(String json) {
-        postJson("warehouse", json);
+    public Optional<Warehouse> getWarehouseBySourceAndSourceId(String source, String sourceId) {
+        List<Warehouse> warehouses = getList("warehouses", new TypeReference<>() {}, Map.of("source", source, "source_id", sourceId));
+        if(warehouses.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(warehouses.getFirst());
+        }
     }
+
+    public Warehouse createWarehouse(Warehouse warehouse) {
+        return post("warehouse", warehouse);
+    }
+
 
     // Other
-
-    public JsonNode getTaxes() {
-        return getJson("taxes");
-    }
 
     public JsonNode getShopInfo() {
         return getJson("shop/info");
     }
 
-    protected void postJson(String apiCall, String json) {
+    protected <T> List<T> getList(String entity, TypeReference<ListContainer<T>> type, Map<String, Object> params) {
+        try {
+            return OBJECT_MAPPER.readValue(
+                    getJsonString(entity, params),
+                    type).getList();
+        } catch (JsonProcessingException e) {
+            throw new BitbeeClientException(e);
+        }
+    }
+    protected <T> List<T> getList(String entity, TypeReference<ListContainer<T>> type) {
+        return getList(entity, type, null);
+    }
+
+    protected <T> T post(String entity, T inObject) {
+        try {
+            String payload = OBJECT_MAPPER.writeValueAsString(inObject);
+            JsonNode root = OBJECT_MAPPER.readTree(postJson(entity, payload));
+            JsonNode object = root.get("object");
+            if(object.isEmpty()) {
+                return null;
+            }
+            return OBJECT_MAPPER.readerFor(inObject.getClass()).readValue(object);
+        } catch (IOException e) {
+            throw new BitbeeClientException(e);
+        }
+    }
+
+    protected <T> T get(String entity, Class<T> returnClass, Map<String, Object> params) {
+        try {
+            JsonNode root = getJson(entity, params);
+            JsonNode object = root.get("object");
+            if(object.isEmpty()) {
+                return null;
+            }
+            return OBJECT_MAPPER.readerFor(returnClass).readValue(object);
+        } catch (IOException e) {
+            throw new BitbeeClientException(e);
+        }
+    }
+
+    protected String postJson(String apiCall, String json) {
         String url = uri + "/" + apiCall;
         if(dryRun) {
             LOG.info("Dry-run, ignore POST to {} with body {}", url, truncate(json, 120, true));
-            return;
+            return null;
         }
+
+        LOG.debug("To send: " + json);
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .headers("Accept", "application/json",
@@ -194,8 +252,9 @@ public class BitbeeClient {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
                 LOG.debug("+Bitbee: POST " + url + " success " + response.statusCode() + ": " + response.body());
+                return response.body();
             } else {
-                throw new RuntimeException("!Bitbee: POST " + url + " failure " + response.statusCode() + ": " + response.body());
+                throw new RuntimeException("!Bitbee: POST " + url + " failure, req: " + json + "\n resp: " + response.statusCode() + ": " + response.body());
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
@@ -203,11 +262,11 @@ public class BitbeeClient {
 
     }
 
-    protected void putJson(String apiCall, String json) {
+    protected String putJson(String apiCall, String json) {
         String url = uri + "/" + apiCall;
         if(dryRun) {
             LOG.info("Dry-run, ignore POST to {} with body {}", url, truncate(json, 40, true));
-            return;
+            return null;
         }
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -221,6 +280,7 @@ public class BitbeeClient {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() < 300) {
                  System.out.println("+Bitbee: POST " + url + " success " + response.statusCode() + ": " + response.body());
+                 return response.body();
             } else {
                 throw new RuntimeException("!Bitbee: POST " + url + " failure " + response.statusCode() + ": " + response.body());
             }
@@ -235,6 +295,13 @@ public class BitbeeClient {
         return getJson(apiCall, Map.of());
     }
     protected JsonNode getJson(String apiCall, Map<String, Object> params) {
+        try {
+            return OBJECT_MAPPER.readTree(getJsonString(apiCall, params));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    protected String getJsonString(String apiCall, Map<String, Object> params) {
         String paramString = "";
         if (params != null && !params.isEmpty()) {
             StringBuilder paramBuilder = new StringBuilder();
@@ -271,11 +338,7 @@ public class BitbeeClient {
 
         if (response.statusCode() == 200) {
             LOG.debug("+Bitbee: GET " + url + " success " + response.statusCode() + ": " + response.body());
-            try {
-                return OBJECT_MAPPER.readTree(response.body());
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
+            return response.body();
         } else {
             throw new RuntimeException("!Bitbee: GET " + url + " failure " + response.statusCode() + ": " + response.body());
         }

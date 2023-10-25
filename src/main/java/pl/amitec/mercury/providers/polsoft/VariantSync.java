@@ -1,18 +1,15 @@
 package pl.amitec.mercury.providers.polsoft;
 
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.amitec.mercury.JobContext;
+import pl.amitec.mercury.clients.bitbee.BitbeeClient;
+import pl.amitec.mercury.clients.bitbee.types.*;
 import pl.amitec.mercury.formats.CSVHelper;
 import pl.amitec.mercury.transport.Transport;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static pl.amitec.mercury.util.Utils.*;
 
@@ -25,6 +22,7 @@ public class VariantSync {
     public Set<String> sync(JobContext jobContext,
                                 Transport deptDir, String dept, Set<String> selectedSourceIds) {
         var csvHelper = new CSVHelper();
+        String source = "polsoft";
 
         try(var stocksReader = deptDir.reader("stany.txt");
             var producersReader = deptDir.reader("produc.txt");
@@ -35,13 +33,13 @@ public class VariantSync {
             var producers = csvHelper.mapCSV(producersReader, "prd_numer", "prd_nazwa");
             var groups = csvHelper.mapCSV(groupsReader, "categories_id", "categories_name");
 
-            Optional<String> warehouseId = jobContext.bitbeeClient().getWarehouseId("polsoft", dept);
-            warehouseId.orElseThrow(); //TODO create warehouses
+            Warehouse warehouse = getOrCreateWarehouse(jobContext, dept, source);
 
             var variantSourceIds = new HashSet<String>();
 
             csvHelper.streamCSV(productReader).forEach(product -> {
-                syncProduct(jobContext, dept, product, selectedSourceIds, producers, groups, warehouseId.get(), stocks)
+                syncProduct(jobContext, dept, product, selectedSourceIds,
+                        producers, groups, warehouse.id().toString(), stocks)
                         .ifPresent(variantSourceIds::add);
             });
 
@@ -49,6 +47,21 @@ public class VariantSync {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static Warehouse getOrCreateWarehouse(JobContext jobContext, String dept, String source) {
+        Warehouse warehouse = jobContext.bitbeeClient()
+                .getWarehouseBySourceAndSourceId(source, dept)
+                .orElseGet(() ->
+                    jobContext.bitbeeClient().createWarehouse(
+                            Warehouse.builder()
+                                    .name(STR."Magazyn \{ dept }")
+                                    .source(source)
+                                    .sourceId(dept)
+                                    .build()
+                    )
+                );
+        return warehouse;
     }
 
     private static Optional<String> syncProduct(
@@ -69,69 +82,49 @@ public class VariantSync {
             return Optional.empty();
         }
 
-        var root = jsonObject(
-                "code", code,
-                "product_code", code,
-                "source", "polsoft", //TODO multi tenant
-                "source_id", sourceId,
-                "ean", product.get("towar_ean_sztuka"),
-                "unit", product.get("tw_jm"),
-                "tax", String.format("%s%%", product.get("towar_vat")),
-                //"status", "Y", //Active, or D - Deleted, or N - inactive
-                "lang", "pl"
-                //"debug", timestamp
-        );
-
-        Optional.ofNullable(product.get("towar_producent")).ifPresent(producerId ->
-                Optional.ofNullable(producers.get(producerId)).ifPresent(producer ->
-                        root.set("producer", jsonObject(
-                                        "source_id", producerId,
-                                        "name", producer,
-                                        "source", "polsoft"
+        var variant = ImportVariant.builder()
+                .code(code)
+                .productCode(code)
+                .source("polsoft") //TODO tenant
+                .sourceId(sourceId)
+                .ean(product.get("towar_ean_sztuka"))
+                .unit(product.get("tw_jm"))
+                .tax(String.format("%s%%", product.get("towar_vat")))
+                .status(Optional.empty())
+                .lang("pl")
+                .debug(Optional.empty())
+                .producer(
+                        Optional.ofNullable(product.get("towar_producent")).flatMap(producerId ->
+                                Optional.ofNullable(producers.get(producerId)).map(producer ->
+                                        new Producer(producerId, producer, "polsoft")
                                 )
+                        ))
+                .name(TranslatedName.of("pl", product.get("towar_nazwa")))
+                .categories(List.of(List.of(Category.builder()
+                                .sourceId(product.get("nr_grupy"))
+                                .name(TranslatedName.of("pl", groups.get(product.get("nr_grupy"))))
+                                .build()
                         )
-                )
-        );
-
-        root.set("name", jsonObject("pl", product.get("towar_nazwa")));
-
-        root.set("categories", jsonArray(jsonArray(jsonObject()
-                        .put("source_id", product.get("nr_grupy"))
-                        .set("name", jsonObject("pl", groups.get(product.get("nr_grupy")))))));
-
-        root.set("attrs", jsonArrayWith(attrs -> {
-            attrs.add(jsonObject(
-                    "name", "GRATIS",
-                    "value", product.get("towar_gratis"),
-                    "lang", "pl"
-            ));
-            attrs.add(jsonObject(
-                    "name", "ZBIORCZE",
-                    "value", product.get("towar_ilosc_opak_zb"),
-                    "lang", "pl"
-            ));
-            Optional.ofNullable(product.get("substancja_czynna")).ifPresent(value ->
-                    attrs.add(jsonObject(
-                            "name", "SUBSTANCJA CZYNNA",
-                            "value", value,
-                            "lang", "pl"
-                    ))
-            );
-        }));
-
-        root.set("stocks", jsonArray(jsonObject(
-                            "source_id", String.format("%s:%s", dept, sourceId),
-                            "source", "polsoft", //TODO multi-tenant
-                            "warehouse_id", warehouseId,
-                            "quantity", stocks.getOrDefault(sourceId, "0"),
-                            "price", product.get("towar_cena1")
-        )));
+                ))
+                .attrs(compactListOf(
+                        new VariantAttr("GRATIS", product.get("towar_gratis"), "pl"),
+                        new VariantAttr("ZBIORCZE", product.get("towar_ilosc_opak_zb"), "pl"),
+                        Optional.ofNullable(product.get("substancja_czynna")).map(value ->
+                                new VariantAttr("SUBSTANCJA CZYNNA", value, "pl")
+                        ).orElse(null)
+                ))
+                .stocks(List.of(Stock.builder()
+                                .sourceId(String.format("%s:%s", dept, sourceId))
+                                .source("polsoft")
+                                .warehouseId(warehouseId)
+                                .quantity(stocks.getOrDefault(sourceId, "0"))
+                                .price(product.get("towar_cena1")).build()))
+                .build();
 
 
         try {
             // TODO stats
-            var jsonMapper = JsonMapper.builder().configure(MapperFeature.ALLOW_COERCION_OF_SCALARS, false).build();
-            String json = jsonMapper.writeValueAsString(root);
+            String json = BitbeeClient.JSON_MAPPER.writeValueAsString(variant);
             jobContext.hashCache().hit(
                     jobContext.getTenant(), "ps", "p", String.format("%s:%s", dept, sourceId), json, (data) -> {
                         LOG.debug("JSON: {}", json);

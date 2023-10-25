@@ -6,7 +6,7 @@ import pl.amitec.mercury.JobContext;
 import pl.amitec.mercury.formats.Charsets;
 import pl.amitec.mercury.persistence.Cache;
 import pl.amitec.mercury.persistence.HashCache;
-import pl.amitec.mercury.providers.bitbee.BitbeeClient;
+import pl.amitec.mercury.clients.bitbee.BitbeeClient;
 import pl.amitec.mercury.transport.FilesystemTransport;
 
 import java.time.Duration;
@@ -35,13 +35,16 @@ public class PsFlow {
     public void watch() {
         var source = PolsoftFtp.configure(config);
         while(true) {
-            processOrders();
-
-            try {
-                source.syncDirToRemote("data/IMPORT_ODDZ_1", "data/IMPORT_ODDZ_1-sent", "/IMPORT_ODDZ_1");
-            } catch (Exception e) {
-                LOG.error(
-                        String.format("Failed to sync dir to remote for %s", source), e);
+            if(Boolean.parseBoolean(config.getOrDefault("polsoft.orders.enabled", "true"))) {
+                processOrders();
+                try {
+                    source.syncDirToRemote("data/IMPORT_ODDZ_1", "data/IMPORT_ODDZ_1-sent", "/IMPORT_ODDZ_1");
+                } catch (Exception e) {
+                    LOG.error(
+                            String.format("Failed to sync dir to remote for %s", source), e);
+                }
+            } else {
+                LOG.info("Skipping orders processing (polsoft.orders.enabled=false)");
             }
 
             try {

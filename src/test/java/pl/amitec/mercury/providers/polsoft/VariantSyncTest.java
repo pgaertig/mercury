@@ -6,9 +6,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.amitec.mercury.JobContext;
+import pl.amitec.mercury.clients.bitbee.types.Warehouse;
 import pl.amitec.mercury.formats.Charsets;
 import pl.amitec.mercury.persistence.HashCache;
-import pl.amitec.mercury.providers.bitbee.BitbeeClient;
+import pl.amitec.mercury.clients.bitbee.BitbeeClient;
 import pl.amitec.mercury.transport.Transport;
 
 import java.io.IOException;
@@ -55,12 +56,26 @@ public class VariantSyncTest {
         when(deptDir.reader(eq("grupy.txt"))).thenReturn(
                 fileReader("polsoft/test1/grupy.txt", Charsets.ISO_8859_2));
 
-        when(rbc.getWarehouseId("polsoft", "1")).thenReturn(Optional.of("3"));
-
     }
 
     @Test
     public void testSimpleProduct() throws IOException {
+        when(rbc.getWarehouseBySourceAndSourceId("polsoft", "1")).thenReturn(
+                Optional.of(Warehouse.builder().id(3).name("").source("").sourceId("").build()));
+
+        new VariantSync().sync(jobContext, deptDir, "1", Set.of("1"));
+
+        verify(hashCache).hit(eq("mm"), eq("ps"), eq("p"), eq("1:1"), eq("""
+                {"code":"2/413","product_code":"2/413","source":"polsoft","source_id":"1","ean":"5903407024134","unit":"KPL","tax":"23%","lang":"pl","producer":{"source_id":"13","name":"CAN -PRODUKTY FIRMY CANPOL BABIES","source":"polsoft"},"name":{"pl":"SZCZ.DO BUT.2/413 I SMOCZKÓW"},"categories":[[{"source_id":"48","name":{"pl":"SZCZOTKI DO BUTELEK"}}]],"attrs":[{"name":"GRATIS","value":"0","lang":"pl"},{"name":"ZBIORCZE","value":"1","lang":"pl"}],"stocks":[{"source_id":"1:1","source":"polsoft","warehouse_id":"3","quantity":"42","price":"3.90"}]}"""), any());
+    }
+
+    @Test
+    public void testWarehouseCreation() throws IOException {
+        when(rbc.getWarehouseBySourceAndSourceId("polsoft", "1")).thenReturn(Optional.empty());
+        Warehouse warehouse1 = Warehouse.builder().name("Magazyn 1").source("polsoft").sourceId("1").build();
+        Warehouse warehouse2 = Warehouse.builder().id(3).name("Magazyn 1").source("polsoft").sourceId("1").build();
+        when(rbc.createWarehouse(eq(warehouse1))).thenReturn(warehouse2);
+
         new VariantSync().sync(jobContext, deptDir, "1", Set.of("1"));
 
         verify(hashCache).hit(eq("mm"), eq("ps"), eq("p"), eq("1:1"), eq("""

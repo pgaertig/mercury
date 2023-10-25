@@ -1,12 +1,13 @@
 package pl.amitec.mercury.providers.polsoft;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.amitec.mercury.JobContext;
 import pl.amitec.mercury.dict.PostCodes;
+import pl.amitec.mercury.clients.bitbee.BitbeeClient;
+import pl.amitec.mercury.clients.bitbee.types.ImportClient;
+import pl.amitec.mercury.clients.bitbee.types.StockDiscount;
 import pl.amitec.mercury.transport.Transport;
 
 import java.util.List;
@@ -64,41 +65,35 @@ public class ClientSync implements PsCommonSync {
             return false;
         }
 
-        var root = jsonObject(
-                "source_id", id,
-                "source", "polsoft", //TODO multitenant/multisource
-                "name", String.format("%s %s", client.get("kt_nazwa"), client.get("kt_nazwa_pom")).trim(),
-                "email", client.get("kt_email"),
-                "phone", client.getOrDefault("kt_telefon","").trim(),
-                "street", client.get("kt_ulica"),
-                "postcode", client.get("kt_kod_pocztowy"),
-                "city", client.get("kt_miasto"),
-                "province", PostCodes.getInstance().codeToProvince(client.get("kt_kod_pocztowy")),
-                "nip", client.get("kt_nip"),
-                "country", "PL");
-
-        root.set("properties", jsonObject(
+        var clientDto = ImportClient.builder()
+                .sourceId(id)
+                .source("polsoft")
+                .name(String.format("%s %s", client.get("kt_nazwa"), client.get("kt_nazwa_pom")).trim())
+                .email(client.get("kt_email"))
+                .phone(client.getOrDefault("kt_telefon","").trim())
+                .street(client.get("kt_ulica"))
+                .postcode(client.get("kt_kod_pocztowy"))
+                .city(client.get("kt_miasto"))
+                .province(PostCodes.getInstance().codeToProvince(client.get("kt_kod_pocztowy")))
+                .nip(client.get("kt_nip"))
+                .country("PL")
+                .properties(orderedMapOfStrings(
                         "iph_department", dept,
                         "iph_pricetype", client.get("kt_rodzaj_ceny"),
                         "iph_discount", client.get("kt_rabat_auto"),
                         "iph_debt", client.get("kt_zadluzenie"),
-                        "iph_sector", client.get("kategoria_1")));
-
-
-        var discounts = clientWithDiscounts.getDiscounts();
-        if(!discounts.isEmpty()) {
-            root.set("stock_discounts", jsonList(
-                    discounts.entrySet().stream().map(entry ->
-                            jsonObject(
-                                    "source_id", String.format("%s:%s", dept, entry.getKey()),
-                                    "price", entry.getValue()
-                            )).toList()
-            ));
-        }
+                        "iph_sector", client.get("kategoria_1")
+                ))
+                .stockDiscounts(
+                        clientWithDiscounts.getDiscounts().entrySet().stream().map(entry ->
+                                StockDiscount.builder()
+                                        .sourceId(String.format("%s:%s", dept, entry.getKey()))
+                                        .price(entry.getValue()).build()
+                                ).toList()
+                ).build();
 
         try {
-            var jsonMapper = JsonMapper.builder().configure(MapperFeature.ALLOW_COERCION_OF_SCALARS, false).build();
-            String json = jsonMapper.writeValueAsString(root);
+            String json = BitbeeClient.JSON_MAPPER.writeValueAsString(clientDto);
             var hit = jobContext.hashCache().hit(
                     jobContext.getTenant(), "ps", "c", String.format("%s:%s", dept, id), json, (data) -> {
                         LOG.debug("JSON: {}", json);

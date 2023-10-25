@@ -10,6 +10,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class Utils {
 
@@ -55,6 +56,10 @@ public class Utils {
     public static <K, V> Map.Entry<K, V> entry(K k, V v) {
         Objects.requireNonNull(k);
         return new LinkedHashMap.SimpleEntry<>(k, v);
+    }
+
+    public static <T> List<T> compactListOf(T...items) {
+        return Arrays.stream(items).filter(Objects::nonNull).toList();
     }
 
     public static ObjectNode jsonObject() {
