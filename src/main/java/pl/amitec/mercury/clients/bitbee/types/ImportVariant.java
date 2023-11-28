@@ -14,6 +14,8 @@ import java.util.Optional;
         "debug", "producer", "name", "categories", "attrs", "stock"})
 @Builder
 public record ImportVariant(
+        String id,
+        String productId,
         String code,
         @JsonProperty("product_code") String productCode,
         String source,

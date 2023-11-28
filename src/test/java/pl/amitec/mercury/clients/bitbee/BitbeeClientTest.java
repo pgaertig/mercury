@@ -95,7 +95,7 @@ public class BitbeeClientTest {
         wireMockServer.stubFor(post(urlPathEqualTo("/api/warehouse"))
                 .withHeader("Content-Type", containing("application/json"))
                 .withRequestBody(equalToJson("""
-                                {"name":"Main warehouse","source":"test","sourceid":"15"}"""))
+                                {"name":"Main warehouse","availability": 24, "source":"test","sourceid":"15"}"""))
                 .willReturn(aResponse().withBody("""
                          {"object":
                            {"id":58847,"name":"Main warehouse","availability":0,"address":"",
@@ -106,7 +106,12 @@ public class BitbeeClientTest {
                           "code":200,"timestamp":{"date":"2023-10-25 09:29:42.816023",
                           "timezone_type":3,"timezone":"Europe/Warsaw"}}"""
                 )));
-        Warehouse result = cli.createWarehouse(Warehouse.builder().name("Main warehouse").source("test").sourceId("15").build());
+        Warehouse result = cli.createWarehouse(Warehouse.builder()
+                .name("Main warehouse")
+                .source("test")
+                .sourceId("15")
+                .availability(24)
+                .build());
         assertNotNull(result);
         assertEquals(58847, result.id());
         assertEquals("Main warehouse", result.name());

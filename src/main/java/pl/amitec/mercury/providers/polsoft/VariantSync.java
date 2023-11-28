@@ -58,6 +58,7 @@ public class VariantSync {
                                     .name(STR."Magazyn \{ dept }")
                                     .source(source)
                                     .sourceId(dept)
+                                    .availability(24)
                                     .build()
                     )
                 );

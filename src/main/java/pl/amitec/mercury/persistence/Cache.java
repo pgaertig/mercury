@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 
 public interface Cache extends Closeable {
 
-    boolean hit(String tenant, String source, String resource, String key, String data, Consumer<String> dataConsumer);
+    <E> boolean hit(String tenant, String source, String resource, String key, E data, Consumer<E> dataConsumer);
 
     void close();
 

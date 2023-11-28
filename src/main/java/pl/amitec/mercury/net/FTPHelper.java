@@ -6,9 +6,6 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.apache.commons.net.io.Util;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.MarkerManager;
-import org.apache.logging.log4j.io.IoBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.amitec.mercury.util.Utils;
@@ -36,11 +33,11 @@ public class FTPHelper {
         this.port = port;
         this.user = user;
         this.password = password;
-        var writer = IoBuilder.forLogger("ftp-wire")
+        /*var writer = IoBuilder.forLogger("ftp-wire")
                 .setLevel(Level.DEBUG)
                 .setMarker(MarkerManager.getMarker("FTP-WIRE"))
                 .buildPrintWriter();
-        ftp.addProtocolCommandListener(new PrintCommandListener(writer, true, (char) 0, true));
+        ftp.addProtocolCommandListener(new PrintCommandListener(writer, true, (char) 0, true));*/
     }
 
     public void connect() throws IOException {

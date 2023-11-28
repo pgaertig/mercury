@@ -48,11 +48,10 @@ public class PsFlow {
             }
 
             try {
-                PolsoftFtp.State state = source.waitForContentPull("/EKSPORT_ODDZ_1");
-                if(state != null) {
-                    sync(state);
-                    source.failureCleanup(state);
-                }
+                source.waitForContentPull("/EKSPORT_ODDZ_1").ifPresent((state) -> {
+                            sync(state);
+                            source.failureCleanup(state);
+                });
                 try {
                     Thread.sleep(Duration.ofSeconds(60));
                 } catch (InterruptedException e) {
@@ -85,12 +84,17 @@ public class PsFlow {
         }
     }
 
-    private void sync(PolsoftFtp.State state) {
+    private void sync(ContentState state) {
         try {
             bitbeeClient.session(() -> {
                 JobContext ctx = new JobContext(cache, bitbeeClient, config, new SyncStats());
-                new VariantSync().sync(ctx, state.transport, "1",null);
-                new ClientSync().sync(ctx, state.transport, "1", null);
+                if(Boolean.parseBoolean(config.getOrDefault("polsoft.invoices.enabled", "true"))) {
+                    new InvoiceSync().sync(ctx, state.getTransport(), "1", null); //TODO dept
+                } else {
+                    LOG.info("Skipping invoices processing (polsoft.invoices.enabled=false)");
+                }
+                new VariantSync().sync(ctx, state.getTransport(), "1",null);
+                new ClientSync().sync(ctx, state.getTransport(), "1", null);
             });
         } catch (Exception e) {
             LOG.error(

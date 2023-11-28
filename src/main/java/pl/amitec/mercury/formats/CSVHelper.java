@@ -8,14 +8,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CSVHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(CSVHelper.class);
+    public static final String LINE = "__line__";
 
     private final CSVFormat csvFormat;
 
@@ -27,6 +26,46 @@ public class CSVHelper {
                 .setAllowMissingColumnNames(true)
                 .build();
     }
+
+    public class CSVRecordMap extends AbstractMap<String, String> {
+        private final CSVRecord record;
+
+        public CSVRecordMap(CSVRecord record) {
+            this.record = record;
+        }
+
+        @Override
+        public Set<Map.Entry<String, String>> entrySet() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String get(Object key) {
+            if (LINE.equals(key)) {
+                return record.toString();
+            }
+            if(record.isMapped((String) key)) {
+                return record.get((String) key);
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        public boolean containsKey(Object key) {
+            if (LINE.equals(key)) {
+                return true;
+            }
+            return record.isMapped((String) key);
+        }
+
+        @Override
+        public String toString() {
+            return record.toString();
+        }
+    }
+
+    public interface AutoClosableIterable<E> extends Iterator<E>, AutoCloseable {}
 
     public Iterable<Map<String, String>> streamCSV(Reader lines) throws IOException {
         CSVParser parser = csvFormat.parse(lines);
@@ -41,12 +80,7 @@ public class CSVHelper {
 
             @Override
             public Map<String, String> next() {
-                CSVRecord record = recordIterator.next();
-                Map<String, String> map = new HashMap<>();
-                for (String header : parser.getHeaderNames()) {
-                    map.put(header, record.get(header));
-                }
-                return map;
+                return new CSVRecordMap(recordIterator.next());
             }
         };
     }

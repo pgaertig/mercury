@@ -34,8 +34,9 @@ public class HashCache implements Cache {
     }
 
     @Override
-    public boolean hit(String tenant, String source, String resource, String key, String data, Consumer<String> dataConsumer) {
-        String hash = Utils.sha1HexDigest(data != null ? data : "");
+    public <E> boolean hit(String tenant, String source, String resource, String key, E data, Consumer<E> dataConsumer) {
+        String strData = data.toString();
+        String hash = Utils.sha1HexDigest(strData != null ? strData : "");
         Timestamp now = new Timestamp(System.currentTimeMillis());
 
         List<Map<String, Object>> result = jdbcTemplate.queryForList(
@@ -54,7 +55,7 @@ public class HashCache implements Cache {
                 dataConsumer.accept(data);
                 jdbcTemplate.update(
                         "UPDATE items SET data_hash = ?, data_size = ?, updated_at = ? WHERE tenant = ? AND source = ? AND resource = ? AND key = ?",
-                        hash, data.length(), now, tenant, source, resource, key);
+                        hash, strData.length(), now, tenant, source, resource, key);
                 return false;
             }
         } else {
@@ -62,7 +63,7 @@ public class HashCache implements Cache {
             jdbcTemplate.update(
                     "INSERT INTO items (tenant, source, resource, key, created_at, updated_at, data_hash, data_size)" +
                             " VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    tenant, source, resource, key, now, now, hash, data.length());
+                    tenant, source, resource, key, now, now, hash, strData.length());
             return false;
         }
     }

@@ -60,7 +60,8 @@ public class MercuryApp implements ApplicationListener<ContextRefreshedEvent> {
             PsFlow.configure(propertiesToMap(props)).watch();
         });
 
-        /*var source = "er_rb_1";
+/*
+        var source = "er_rb_1";
         var pipeline = Thread.ofVirtual().name(source).unstarted(() -> {
             MDC.put("tenant", source);
             MDC.put("tenant-log", String.format("log/sources/%s/", source));

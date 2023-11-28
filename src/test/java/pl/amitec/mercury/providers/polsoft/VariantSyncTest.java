@@ -72,8 +72,8 @@ public class VariantSyncTest {
     @Test
     public void testWarehouseCreation() throws IOException {
         when(rbc.getWarehouseBySourceAndSourceId("polsoft", "1")).thenReturn(Optional.empty());
-        Warehouse warehouse1 = Warehouse.builder().name("Magazyn 1").source("polsoft").sourceId("1").build();
-        Warehouse warehouse2 = Warehouse.builder().id(3).name("Magazyn 1").source("polsoft").sourceId("1").build();
+        Warehouse warehouse1 = Warehouse.builder().name("Magazyn 1").source("polsoft").sourceId("1").availability(24).build();
+        Warehouse warehouse2 = Warehouse.builder().id(3).name("Magazyn 1").source("polsoft").sourceId("1").availability(24).build();
         when(rbc.createWarehouse(eq(warehouse1))).thenReturn(warehouse2);
 
         new VariantSync().sync(jobContext, deptDir, "1", Set.of("1"));
