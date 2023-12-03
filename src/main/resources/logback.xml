@@ -6,16 +6,16 @@
     <appender name="FILE-THREAD" class="ch.qos.logback.classic.sift.SiftingAppender">
 
         <!-- This is MDC value -->
-        <!-- We will assign a value to 'tenant' via Java code -->
+        <!-- We will assign a value to 'plan' via Java code -->
         <discriminator>
-            <key>tenant-log</key>
+            <key>plan-log</key>
             <defaultValue>log/mercury.</defaultValue>
         </discriminator>
 
         <sift>
 
             <!-- A standard RollingFileAppender, the log file is based on 'logFileName' at runtime  -->
-            <appender name="FILE-${tenant}"
+            <appender name="FILE-${plan}"
                       class="ch.qos.logback.core.rolling.RollingFileAppender">
                 <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
                     <Pattern>
@@ -26,7 +26,7 @@
                 <rollingPolicy
                         class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
                     <fileNamePattern>
-                        ${tenant-log}%d{yyyy-MM-dd}.log.gz
+                        ${plan-log}%d{yyyy-MM-dd}.log.gz
                     </fileNamePattern>
                     <maxHistory>14</maxHistory>
                 </rollingPolicy>
@@ -56,7 +56,7 @@
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
-                %X{tenant:--}|${CONSOLE_LOG_PATTERN}
+                %X{plan:--}|${CONSOLE_LOG_PATTERN}
             </Pattern>
         </layout>
     </appender>

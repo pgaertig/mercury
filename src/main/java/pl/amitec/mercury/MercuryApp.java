@@ -3,7 +3,6 @@ package pl.amitec.mercury;
 import ch.qos.logback.classic.LoggerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -13,14 +12,9 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
-import pl.amitec.mercury.providers.polsoft.PsFlow;
-import pl.amitec.mercury.providers.redbay.RedbayToBitbeePlan;
+import pl.amitec.mercury.engine.PlanLoader;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Properties;
-
-import static pl.amitec.mercury.util.StructUtils.propertiesToMap;
+import java.util.List;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class,
         DataSourceTransactionManagerAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
@@ -30,7 +24,18 @@ public class MercuryApp implements ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger LOG = LoggerFactory.getLogger(MercuryApp.class);
 
-    public MercuryApp() {
+    private PlanLoader planLoader;
+    private IntegratorDiscovery integratorDiscovery;
+
+    private FlowControl flowControl;
+
+    public MercuryApp(
+            PlanLoader planLoader,
+            IntegratorDiscovery integratorDiscovery,
+            FlowControl flowControl) {
+        this.planLoader = planLoader;
+        this.integratorDiscovery = integratorDiscovery;
+        this.flowControl = flowControl;
     }
 
     public static void main(String[] args) {
@@ -43,39 +48,28 @@ public class MercuryApp implements ApplicationListener<ContextRefreshedEvent> {
         LoggerContext ctx = (LoggerContext) LoggerFactory.getILoggerFactory();
         /*ctx.setMDCAdapter( new LogbackMDCAdapter() {
             delegate = new BasicMDCAdapter();
-        }
-                );*/
-        var source = "mm_ps_1";
-        var pipeline = Thread.ofVirtual().name(source).unstarted(() -> {
-            MDC.put("tenant", source);
-            MDC.put("tenant-log", String.format("log/sources/%s/", source));
-            LOG.info("Polsoft plugin for tenant: mm");
-            Properties props = new Properties();
-            try {
-                props.load(new FileReader(
-                        String.format("data/sources/%s.properties", source)));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            PsFlow.configure(propertiesToMap(props)).watch();
-        });
-
-/*
-        var source = "er_rb_1";
-        var pipeline = Thread.ofVirtual().name(source).unstarted(() -> {
-            MDC.put("tenant", source);
-            MDC.put("tenant-log", String.format("log/sources/%s/", source));
-            LOG.info("Redbay plugin for tenant: er");
-            Properties props = new Properties();
-            try {
-                props.load(new FileReader(
-                        String.format("data/sources/%s.properties", source)));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            new RedbayToBitbeePlan().configure(propertiesToMap(props)).run();
         });*/
 
-        pipeline.start();
+        List<Plan> plans = planLoader.getAllPlans();
+        LOG.info("Found {} plans", plans.size());
+        plans.forEach(plan -> {
+            try {
+                LOG.info("Starting plan: {}", plan.name());
+                flowControl.run(plan.name(), () -> {
+                    Class<? extends Integrator> integratorClass = integratorDiscovery.getIntegrator(plan.integrator()).orElseThrow(
+                            () -> new RuntimeException("Integrator not found: " + plan.integrator())
+                    );
+                    try {
+                        Integrator integrator = integratorClass.getConstructor().newInstance();
+                        integrator.testPlan(plan);
+                        integrator.runPlan(plan);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 }

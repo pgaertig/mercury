@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@MercuryPlan(name="bitbee-redbay")
 public class RedbayToBitbeePlan implements MercuryPlanConfigurator {
 
     private static final Logger LOG = LoggerFactory.getLogger(RedbayToBitbeePlan.class);
