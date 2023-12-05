@@ -7,16 +7,12 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.amitec.mercury.clients.bitbee.impl.BitbeeFormatsModule;
-import pl.amitec.mercury.clients.bitbee.impl.LocalTimeDeserializer;
-import pl.amitec.mercury.clients.bitbee.impl.OffsetTimeDeserializer;
 import pl.amitec.mercury.clients.bitbee.types.*;
-import pl.amitec.mercury.providers.bitbee.AuthTokenResponse;
+import pl.amitec.mercury.clients.bitbee.types.AuthTokenResponse;
 
 import java.io.IOException;
 import java.net.URI;
@@ -25,8 +21,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalTime;
-import java.time.OffsetTime;
 import java.util.*;
 
 import static pl.amitec.mercury.util.StringUtils.truncate;

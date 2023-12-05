@@ -1,7 +1,7 @@
 package pl.amitec.mercury.engine;
 
 import org.junit.jupiter.api.Test;
-import pl.amitec.mercury.providers.polsoft.PsConfig;
+import pl.amitec.mercury.integrators.polsoft.PsConfig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
