@@ -3,7 +3,9 @@ package pl.amitec.mercury;
 public interface Integrator {
     String getName();
 
-    boolean testPlan(Plan plan) throws MercuryException, InterruptedException;
+    boolean configure(PlanExecution planExecution);
 
-    void runPlan(Plan plan) throws MercuryException, InterruptedException;
+    boolean test() throws MercuryException, InterruptedException;
+
+    void run() throws MercuryException, InterruptedException;
 }

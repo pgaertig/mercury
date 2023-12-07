@@ -17,6 +17,7 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
 
 import java.util.Properties;
 
+@Deprecated
 public class ConfigurationLoader {
     public static <T> T loadConfiguration(Class<T> configClass, String... files) throws Exception {
         DefaultResourceLoader resourceLoader = new DefaultResourceLoader();

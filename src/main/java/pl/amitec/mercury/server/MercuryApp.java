@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import pl.amitec.mercury.FlowControl;
 import pl.amitec.mercury.Integrator;
 import pl.amitec.mercury.Plan;
+import pl.amitec.mercury.PlanExecution;
 
 import java.util.List;
 
@@ -27,17 +28,13 @@ public class MercuryApp implements ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOG = LoggerFactory.getLogger(MercuryApp.class);
 
     private PlanLoader planLoader;
-    private IntegratorDiscovery integratorDiscovery;
-
-    private FlowControl flowControl;
+    private PlanExecutor planExecutor;
 
     public MercuryApp(
             PlanLoader planLoader,
-            IntegratorDiscovery integratorDiscovery,
-            FlowControl flowControl) {
+            PlanExecutor planExecutor) {
         this.planLoader = planLoader;
-        this.integratorDiscovery = integratorDiscovery;
-        this.flowControl = flowControl;
+        this.planExecutor = planExecutor;
     }
 
     public static void main(String[] args) {
@@ -55,22 +52,15 @@ public class MercuryApp implements ApplicationListener<ContextRefreshedEvent> {
         List<Plan> plans = planLoader.getAllPlans();
         LOG.info("Found {} plans", plans.size());
         plans.forEach(plan -> {
-            try {
-                LOG.info("Starting plan: {}", plan.name());
-                flowControl.run(plan.name(), () -> {
-                    Class<? extends Integrator> integratorClass = integratorDiscovery.getIntegrator(plan.integrator()).orElseThrow(
-                            () -> new RuntimeException("Integrator not found: " + plan.integrator())
-                    );
-                    try {
-                        Integrator integrator = integratorClass.getConstructor().newInstance();
-                        integrator.testPlan(plan);
-                        integrator.runPlan(plan);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            if(plan.enabled()) {
+                try {
+                    LOG.info("Starting plan: {}", plan.name());
+                    planExecutor.execute(plan);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                LOG.info("Skipping plan {} as it is disabled", plan.name());
             }
         });
     }
