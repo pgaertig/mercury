@@ -53,26 +53,32 @@ public class PlanLoader {
     public static Map<String, Map<String, String>> loadPropertiesFromDirectory(String dir) {
         Map<String, Map<String, String>> propertiesMap = new HashMap<>();
         Path dirPath = Paths.get(dir);
-        // TODO support subdirectories
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath, "*.properties")) {
-            for (Path entry : stream) {
-                Properties properties = new Properties();
+        scanDirectory(dirPath, propertiesMap);
+        return propertiesMap;
+    }
 
-                try (InputStream in = Files.newInputStream(entry)) {
-                    properties.load(in);
-                    var relativePath = dirPath.relativize(entry);
-                    var fileNameWithoutExtension = relativePath.getFileName().toString().replaceFirst("[.]properties$", "");
-                    properties.putIfAbsent("name", fileNameWithoutExtension);
-                    propertiesMap.put(relativePath.toString(), propertiesToMap(properties));
-                } catch (IOException e) {
-                    e.printStackTrace();
+    private static void scanDirectory(Path dirPath, Map<String, Map<String, String>> propertiesMap) {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath)) {
+            for (Path entry : stream) {
+                if (Files.isDirectory(entry)) {
+                    scanDirectory(entry, propertiesMap);
+                } else if (entry.toString().endsWith(".properties")) {
+                    Properties properties = new Properties();
+
+                    try (InputStream in = Files.newInputStream(entry)) {
+                        properties.load(in);
+                        var relativePath = dirPath.relativize(entry);
+                        var fileNameWithoutExtension = relativePath.getFileName().toString().replaceFirst("[.]properties$", "");
+                        properties.putIfAbsent("name", fileNameWithoutExtension);
+                        propertiesMap.put(relativePath.toString(), propertiesToMap(properties));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("Failed to load properties from directory: {}", dirPath, e);
         }
-
-        return propertiesMap;
     }
 
     public List<Plan> getAllPlans() {

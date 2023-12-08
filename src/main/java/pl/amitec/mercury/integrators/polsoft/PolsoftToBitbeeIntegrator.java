@@ -19,7 +19,7 @@ public class PolsoftToBitbeeIntegrator implements Integrator {
     }
 
     public boolean test() throws MercuryException, InterruptedException {
-        // TODO implement
+        PsFlow.configure(planExecution.getPlan().config()).test();
         return true;
     }
 

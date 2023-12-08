@@ -21,6 +21,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.*;
 
 import static pl.amitec.mercury.util.StringUtils.truncate;
@@ -62,6 +63,19 @@ public class BitbeeClient {
         }
     }
 
+    public BitbeeClient(BitbeeConfig config) {
+        this(config.getUrl(),
+                config.getApiKey(),
+                config.getAuthId(),
+                config.getAuthPass(),
+                config.getEmail(),
+                config.getPass(),
+                config.isReadonly());
+        if (dryRun) {
+            LOG.warn("Dry-run client");
+        }
+    }
+
     public BitbeeClient(String uri, String apikey, String authId, String authPass, String email, String pass, boolean dryRun) {
         this.uri = uri;
         this.host = URI.create(uri).getHost();
@@ -72,6 +86,7 @@ public class BitbeeClient {
         this.client = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_2)
                 .followRedirects(HttpClient.Redirect.NORMAL)
+                .connectTimeout(Duration.ofSeconds(10))
                 .build();
         this.authId = authId;
         this.authPass = authPass;
@@ -87,11 +102,18 @@ public class BitbeeClient {
     }
 
     public void session(Runnable block) throws Exception {
+        getToken();
+        login();
+        block.run();
+    }
+
+    protected void getToken() throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(uri + "/authorization/token"))
                 .headers("Accept", "application/json",
                         "Api-Key", apikey,
                         "Authorization", "Basic " + auth1)
+                .timeout(Duration.ofSeconds(10))
                 .GET()
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -102,8 +124,6 @@ public class BitbeeClient {
         } else {
             throw new BitbeeClientException(STR. "Authorization failed (apikey=\{ apikey }, auth_id=\{ authId }, auth_pass=\{ authPass }): \{ response.body() }" );
         }
-        login();
-        block.run();
     }
 
     protected void login() throws IOException, InterruptedException {
@@ -113,6 +133,7 @@ public class BitbeeClient {
                 .headers("Accept", "application/json",
                         "Api-Key", apikey,
                         "Authorization", "Bearer " + token)
+                .timeout(Duration.ofSeconds(10))
                 .POST(HttpRequest.BodyPublishers.ofString(JSON_MAPPER.writeValueAsString(userLogin)))
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -401,8 +422,16 @@ public class BitbeeClient {
     }
 
     protected HttpRequest.Builder authorizedRequestBuilder(String url) {
+        if(token == null || userPublicKey == null) {
+            try {
+                session(()->{});
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
         return HttpRequest.newBuilder()
                 .uri(URI.create(url))
+                .timeout(Duration.ofSeconds(10))
                 .headers("Accept", "application/json",
                         "Api-Key", apikey,
                         "Authorization", "Bearer " + token,

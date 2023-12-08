@@ -27,6 +27,6 @@ public class BusinessCentralToBitbeeIntegrator implements Integrator {
     }
 
     public void run() throws MercuryException, InterruptedException {
-        new Flow(planExecution).test(); //todo
+        new Flow(planExecution).loop();
     }
 }

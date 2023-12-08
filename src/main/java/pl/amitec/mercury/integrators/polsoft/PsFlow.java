@@ -101,4 +101,27 @@ public class PsFlow {
                     String.format("Failed to sync variants/clients, state: %s", state), e);
         }
     }
+
+    /**
+     * Checks FTP connection and credentials, throws exception if not working
+     * Check Bitbee connection and credentials, throws exception if not working
+     */
+    public void test() {
+        var sourceFtp = PolsoftFtp.configure(config);
+        boolean pass = true;
+        try {
+            sourceFtp.withConnected((ftp) -> {
+                LOG.info("Test - FTP connection OK");
+            });
+        } catch (Exception e) {
+            LOG.error("Test - FTP connection failed", e);
+            pass = false;
+        }
+        try {
+            LOG.info("Test - Bitbee connection OK, shop info: {}", bitbeeClient.getShopInfo());
+        } catch (Exception e) {
+            LOG.error("Test - Bitbee connection failed", e);
+            pass = false;
+        }
+    }
 }

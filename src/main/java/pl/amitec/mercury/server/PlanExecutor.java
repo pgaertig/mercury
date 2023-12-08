@@ -32,7 +32,6 @@ public class PlanExecutor {
             public <T extends Configurable> T loadConfig(Class<T> object) {
                 return configMapper.map(plan.config(), object);
             }
-
         };
 
         flowControl.run(plan.name(), () -> {

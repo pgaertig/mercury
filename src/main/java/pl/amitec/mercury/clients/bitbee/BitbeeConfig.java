@@ -1,4 +1,4 @@
-package pl.amitec.mercury.integrators.dynamics;
+package pl.amitec.mercury.clients.bitbee;
 
 import lombok.Data;
 

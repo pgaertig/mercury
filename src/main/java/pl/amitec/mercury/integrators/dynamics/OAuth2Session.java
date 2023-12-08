@@ -13,6 +13,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
@@ -29,7 +30,6 @@ public class OAuth2Session {
 
     private String accessToken;
     private long accessTokenExpiresAt;
-
     private final ReentrantLock refreshLock = new ReentrantLock();
 
     public OAuth2Session(String accessTokenUrl, String clientId, String clientSecret, String scope) {
@@ -46,11 +46,21 @@ public class OAuth2Session {
                 if (accessToken == null || accessTokenExpiresAt < System.currentTimeMillis()) {
                     requestOAuth2AccessToken();
                 }
+                return accessToken;
             } finally {
                 refreshLock.unlock();
             }
         }
         return accessToken;
+    }
+
+    /**
+     * Forcibly refreshes the access token.
+     */
+    public void reset() {
+        refreshLock.lock();
+        accessToken = null;
+        refreshLock.unlock();
     }
 
     private void requestOAuth2AccessToken() {
