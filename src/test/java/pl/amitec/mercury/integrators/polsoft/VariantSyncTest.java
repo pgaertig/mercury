@@ -6,15 +6,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.amitec.mercury.JobContext;
+import pl.amitec.mercury.SyncStats;
+import pl.amitec.mercury.clients.bitbee.BitbeeClient;
 import pl.amitec.mercury.clients.bitbee.types.Warehouse;
 import pl.amitec.mercury.formats.Charsets;
 import pl.amitec.mercury.persistence.HashCache;
-import pl.amitec.mercury.clients.bitbee.BitbeeClient;
 import pl.amitec.mercury.transport.Transport;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -60,8 +60,8 @@ public class VariantSyncTest {
 
     @Test
     public void testSimpleProduct() throws IOException {
-        when(rbc.getWarehouseBySourceAndSourceId("polsoft", "1")).thenReturn(
-                Optional.of(Warehouse.builder().id(3).name("").source("").sourceId("").build()));
+        Warehouse warehouse = Warehouse.builder().id(3).name("").source("").sourceId("").build();
+        when(rbc.getOrCreateWarehouse(any())).thenReturn(warehouse);
 
         new VariantSync().sync(jobContext, deptDir, "1", Set.of("1"));
 
@@ -71,10 +71,9 @@ public class VariantSyncTest {
 
     @Test
     public void testWarehouseCreation() throws IOException {
-        when(rbc.getWarehouseBySourceAndSourceId("polsoft", "1")).thenReturn(Optional.empty());
         Warehouse warehouse1 = Warehouse.builder().name("Magazyn 1").source("polsoft").sourceId("1").availability(24).build();
         Warehouse warehouse2 = Warehouse.builder().id(3).name("Magazyn 1").source("polsoft").sourceId("1").availability(24).build();
-        when(rbc.createWarehouse(eq(warehouse1))).thenReturn(warehouse2);
+        when(rbc.getOrCreateWarehouse(eq(warehouse1))).thenReturn(warehouse2);
 
         new VariantSync().sync(jobContext, deptDir, "1", Set.of("1"));
 

@@ -1,4 +1,4 @@
-package pl.amitec.mercury.integrators.polsoft;
+package pl.amitec.mercury;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

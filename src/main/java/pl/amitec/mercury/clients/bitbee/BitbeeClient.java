@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.amitec.mercury.clients.bitbee.impl.BitbeeFormatsModule;
 import pl.amitec.mercury.clients.bitbee.types.*;
-import pl.amitec.mercury.clients.bitbee.types.AuthTokenResponse;
 
 import java.io.IOException;
 import java.net.URI;
@@ -120,6 +119,7 @@ public class BitbeeClient {
         AuthTokenResponse tokenResponse = JSON_MAPPER.readValue(response.body(), AuthTokenResponse.class);
 
         if (response.statusCode() == 200) {
+            LOG.debug("Authorization token body: {}", response.body());
             token = tokenResponse.token();
         } else {
             throw new BitbeeClientException(STR. "Authorization failed (apikey=\{ apikey }, auth_id=\{ authId }, auth_pass=\{ authPass }): \{ response.body() }" );
@@ -140,6 +140,7 @@ public class BitbeeClient {
         UserLoginResponse loginResponse = JSON_MAPPER.readValue(response.body(), UserLoginResponse.class);
 
         if (response.statusCode() == 200) {
+            LOG.debug("Login body: {}", response.body());
             token = response.headers().firstValue("refreshed-token").get();
             userPublicKey = loginResponse.publicKey();
         } else {
@@ -197,17 +198,20 @@ public class BitbeeClient {
 
     // Orders
 
-    public JsonNode getOrder(String id) {
+    @Deprecated(forRemoval = true)
+    public JsonNode getOrderJson(String id) {
         return getJson("order/" + id, new HashMap<>()).get("object");
     }
 
-    public void confirmOrder(String id) {
-        postJson("order/" + id + "/confirm", "");
+    public Optional<Order> getOrder(String id) {
+        return get("order/" + id, Order.class, Map.of());
     }
+
 
     // Journal
 
-    public JsonNode getJournal(String type, boolean includeConfirmed, Integer limit) {
+    @Deprecated(forRemoval = true) //TODO implement around #get
+    public JsonNode getJournalJson(String type, boolean includeConfirmed, Integer limit) {
         var params = new HashMap<String, Object>();
         params.put("type", type);
         if (includeConfirmed) {
@@ -219,12 +223,21 @@ public class BitbeeClient {
         return getJson("journal", params);
     }
 
-    public JsonNode getOrdersJournal() {
-        return getJournal("order", false, 100);
+    @Deprecated(forRemoval = true) //TODO use getOrdersJournal2
+    public JsonNode getOrdersJournalJson() {
+        return getJournalJson("order", false, 100);
+    }
+
+    public List<JournalItem> getOrdersJournal() {
+        //TODO support include_confirmed and limit from pure json version
+        return getList("journal", new TypeReference<>() {}, Map.of("type", "order"));
     }
 
     public void confirmJournalItem(String id) {
         putJson("journal/" + id + "/confirm", "");
+    }
+    public void confirmJournalItem(JournalItem item) {
+        put("journal/" + item.id() + "/confirm", null);
     }
 
     public List<Tax> getTaxes() {
@@ -233,6 +246,11 @@ public class BitbeeClient {
 
     public List<Warehouse> getWarehouses() {
         return getList("warehouses", new TypeReference<>() {});
+    }
+
+    public Warehouse getOrCreateWarehouse(Warehouse warehouse) {
+        return getWarehouseBySourceAndSourceId(warehouse.source(), warehouse.sourceId())
+                .orElseGet(() -> createWarehouse(warehouse));
     }
 
     public Optional<Warehouse> getWarehouseBySourceAndSourceId(String source, String sourceId) {
@@ -361,7 +379,7 @@ public class BitbeeClient {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() < 300) {
-                System.out.println("+Bitbee: POST " + url + " success " + response.statusCode() + ": " + response.body());
+                LOG.debug("+Bitbee: PUT " + url + " success " + response.statusCode() + ": " + response.body());
                 return response.body();
             } else {
                 throw new RuntimeException("!Bitbee: POST " + url + " failure " + response.statusCode() + ": " + response.body());

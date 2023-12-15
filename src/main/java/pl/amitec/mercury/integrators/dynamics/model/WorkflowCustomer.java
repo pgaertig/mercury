@@ -1,12 +1,9 @@
 package pl.amitec.mercury.integrators.dynamics.model;
 
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
 
 import java.time.ZonedDateTime;
-import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record WorkflowCustomer (
@@ -24,7 +21,7 @@ public record WorkflowCustomer (
     String postCode,
     @JsonProperty("eMail") String email,
     String contactType,
-    boolean pricesIncludingVat,
-    @JsonAnySetter Map<String, Object> unknownFields
+    boolean pricesIncludingVat//,
+    //@JsonAnySetter Map<String, Object> unknownFields
 ) {
 }

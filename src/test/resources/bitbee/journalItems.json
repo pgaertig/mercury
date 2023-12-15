@@ -1,0 +1,48 @@
+{
+  "list": [
+    {
+      "id": "59",
+      "shop": "3",
+      "type": "order",
+      "objectId": "146",
+      "active": "Y",
+      "added": "2023-08-28 11:08:59",
+      "modified": "2023-08-28 11:08:59",
+      "confirm": "N"
+    },
+    {
+      "id": "60",
+      "shop": "3",
+      "type": "order",
+      "objectId": "147",
+      "active": "Y",
+      "added": "2023-08-28 11:24:31",
+      "modified": "2023-08-28 11:24:31",
+      "confirm": "N"
+    },
+    {
+      "id": "61",
+      "shop": "3",
+      "type": "order",
+      "objectId": "148",
+      "active": "Y",
+      "added": "2023-08-28 12:19:37",
+      "modified": "2023-08-28 12:19:37",
+      "confirm": "N"
+    }
+  ],
+  "validate": true,
+  "redirect": "",
+  "itemsCount": 3,
+  "result": null,
+  "errors": [],
+  "encoding": "UTF-8",
+  "exception": null,
+  "messages": [],
+  "code": 200,
+  "timestamp": {
+    "date": "2023-08-28 12:27:40.027976",
+    "timezone_type": 3,
+    "timezone": "Europe\/Warsaw"
+  }
+}

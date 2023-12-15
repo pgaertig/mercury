@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mercury - Admin</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" />
+    <script type="importmap">
+        {
+            "imports": {
+                "bootstrap": "/webjars/bootstrap/5.3.0/js/bootstrap.esm.min.js",
+                "stimulus": "/webjars/hotwired__stimulus/3.2.1/dist/stimulus.umd.js",
+                "turbo": "/webjars/hotwired__turbo/7.3.0/dist/turbo.es2017-esm.js"
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Mercury Admin</h1>
+
+    <h2>Plans</h2>
+    <table class="table">
+        <tr>
+            <th>Plan</th>
+            <th>Integrator</th>
+            <th>Status</th>
+        </tr>
+        <tr th:each="plan : ${plans}">
+            <td th:text="${plan.name()}"></td>
+            <td th:text="${plan.integrator()}"></td>
+            <td th:text="${plan.enabled()}"></td>
+        </tr>
+    </table>
+
+    <!-- Repeat similar table for Integrators -->
+    <table class="table">
+        <tr>
+            <th>Integrator</th>
+        </tr>
+        <tr th:each="integrator : ${integrators}">
+            <td th:text="${integrator}"></td>
+        </tr>
+    </table>
+
+    <script type="module">
+        import 'bootstrap'
+        import 'stimulus'
+        import 'turbo'
+    </script>
+
+</body>
+</html>

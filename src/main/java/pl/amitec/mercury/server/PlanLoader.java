@@ -12,7 +12,10 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import static pl.amitec.mercury.util.StructUtils.propertiesToMap;
@@ -72,7 +75,7 @@ public class PlanLoader {
                         properties.putIfAbsent("name", fileNameWithoutExtension);
                         propertiesMap.put(relativePath.toString(), propertiesToMap(properties));
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        throw new RuntimeException(e);
                     }
                 }
             }

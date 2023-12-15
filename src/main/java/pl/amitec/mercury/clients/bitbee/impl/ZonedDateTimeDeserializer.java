@@ -7,16 +7,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.OffsetTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class OffsetTimeDeserializer extends JsonDeserializer<OffsetTime> {
+public class ZonedDateTimeDeserializer extends JsonDeserializer<ZonedDateTime> {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
 
     @Override
-    public OffsetTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+    public ZonedDateTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         JsonNode node = jsonParser.getCodec().readTree(jsonParser);
         if(node.isEmpty()) {
             return null;
@@ -26,6 +25,6 @@ public class OffsetTimeDeserializer extends JsonDeserializer<OffsetTime> {
         ZoneId zoneId = ZoneId.of(timezone);
         LocalDateTime localDateTime = LocalDateTime.parse(dateAsString, DATE_TIME_FORMATTER);
         ZonedDateTime zonedDateTime = localDateTime.atZone(zoneId);
-        return zonedDateTime.toOffsetDateTime().toOffsetTime();
+        return zonedDateTime;
     }
 }

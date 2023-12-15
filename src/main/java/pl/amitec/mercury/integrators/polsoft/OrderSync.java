@@ -24,7 +24,8 @@ public class OrderSync {
     private static final Pattern UNIQUE_NUMBER_PATTERN = Pattern.compile("^RB0*(\\d+)-0*(\\d+)$");
     public void sync(JobContext ctx, Transport transport, String dept) {
         Transport importDir = transport.subdir(String.format("IMPORT_ODDZ_%s", dept));
-        ArrayNode journalOrders = (ArrayNode) ctx.bitbeeClient().getOrdersJournal().path("list");
+        ArrayNode journalOrders = (ArrayNode) ctx.bitbeeClient().getOrdersJournalJson().path("list");
+
         if(!journalOrders.isArray()) {
             throw new RuntimeException("Orders is not array");
         }
@@ -40,7 +41,7 @@ public class OrderSync {
     private static boolean processOrder(JobContext ctx, JsonNode item, Transport importDir) {
         var journalId = item.get("id").asText();
         var orderId = item.get("objectId").asText();
-        var order = ctx.bitbeeClient().getOrder(orderId);
+        var order = ctx.bitbeeClient().getOrderJson(orderId);
 
         if(order == null) {
             LOG.info("Order {} not found in backend", orderId);
@@ -100,8 +101,8 @@ public class OrderSync {
         }
 
         if (sources.contains("polsoft")) { // TODO change to dynamic source
-            System.out.println(headerData.toString());
-            System.out.println(positionsData.toString());
+            LOG.debug("Header data: {}", headerData.toString());
+            LOG.debug("Positions data: {}", positionsData.toString());
 
             String marker = addedAt.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + "." + sequenceNo;
             importDir.write("N" + marker + ".txt", headerData.toString());

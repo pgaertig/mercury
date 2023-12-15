@@ -3,10 +3,11 @@ package pl.amitec.mercury.integrators.polsoft;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.amitec.mercury.JobContext;
+import pl.amitec.mercury.SyncStats;
+import pl.amitec.mercury.clients.bitbee.BitbeeClient;
 import pl.amitec.mercury.formats.Charsets;
 import pl.amitec.mercury.persistence.Cache;
 import pl.amitec.mercury.persistence.HashCache;
-import pl.amitec.mercury.clients.bitbee.BitbeeClient;
 import pl.amitec.mercury.transport.FilesystemTransport;
 
 import java.time.Duration;

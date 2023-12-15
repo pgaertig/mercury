@@ -1,8 +1,7 @@
 package pl.amitec.mercury;
 
-import pl.amitec.mercury.persistence.Cache;
-import pl.amitec.mercury.integrators.polsoft.SyncStats;
 import pl.amitec.mercury.clients.bitbee.BitbeeClient;
+import pl.amitec.mercury.persistence.Cache;
 
 import java.util.Map;
 import java.util.Objects;

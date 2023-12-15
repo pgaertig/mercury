@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record WorkflowCustomersResponse(
-        @JsonProperty("value") List<WorkflowCustomer> list
-) {
-}
+public record ListValue<T>(
+    @JsonProperty("value") List<T> list
+) {}

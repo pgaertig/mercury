@@ -11,7 +11,7 @@ import pl.amitec.mercury.transport.Transport;
 import java.io.IOException;
 import java.util.*;
 
-import static pl.amitec.mercury.util.Utils.*;
+import static pl.amitec.mercury.util.Utils.compactListOf;
 
 public class VariantSync {
     private static final Logger LOG = LoggerFactory.getLogger(VariantSync.class);
@@ -33,7 +33,14 @@ public class VariantSync {
             var producers = csvHelper.mapCSV(producersReader, "prd_numer", "prd_nazwa");
             var groups = csvHelper.mapCSV(groupsReader, "categories_id", "categories_name");
 
-            Warehouse warehouse = getOrCreateWarehouse(jobContext, dept, source);
+            Warehouse warehouse = jobContext.bitbeeClient().getOrCreateWarehouse(
+                    Warehouse.builder()
+                            .name(STR."Magazyn \{ dept }")
+                            .source(source)
+                            .sourceId(dept)
+                            .availability(24)
+                            .build()
+            );
 
             var variantSourceIds = new HashSet<String>();
 
@@ -47,22 +54,6 @@ public class VariantSync {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static Warehouse getOrCreateWarehouse(JobContext jobContext, String dept, String source) {
-        Warehouse warehouse = jobContext.bitbeeClient()
-                .getWarehouseBySourceAndSourceId(source, dept)
-                .orElseGet(() ->
-                    jobContext.bitbeeClient().createWarehouse(
-                            Warehouse.builder()
-                                    .name(STR."Magazyn \{ dept }")
-                                    .source(source)
-                                    .sourceId(dept)
-                                    .availability(24)
-                                    .build()
-                    )
-                );
-        return warehouse;
     }
 
     private static Optional<String> syncProduct(
@@ -91,15 +82,15 @@ public class VariantSync {
                 .ean(product.get("towar_ean_sztuka"))
                 .unit(product.get("tw_jm"))
                 .tax(String.format("%s%%", product.get("towar_vat")))
-                .status(Optional.empty())
+                //.status(Optional.empty())
                 .lang("pl")
-                .debug(Optional.empty())
+                //.debug(Optional.empty())
                 .producer(
                         Optional.ofNullable(product.get("towar_producent")).flatMap(producerId ->
                                 Optional.ofNullable(producers.get(producerId)).map(producer ->
                                         new Producer(producerId, producer, "polsoft")
                                 )
-                        ))
+                        ).orElse(null))
                 .name(TranslatedName.of("pl", product.get("towar_nazwa")))
                 .categories(List.of(List.of(Category.builder()
                                 .sourceId(product.get("nr_grupy"))

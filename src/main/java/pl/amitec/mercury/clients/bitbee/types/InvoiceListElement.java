@@ -6,8 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.OffsetTime;
+import java.time.ZonedDateTime;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -20,6 +19,6 @@ public record InvoiceListElement(
         BigDecimal netto,
         BigDecimal brutto,
         String resourceUrl,
-        OffsetTime added,
-        OffsetTime payment
+        ZonedDateTime added,
+        ZonedDateTime payment
 ) {}

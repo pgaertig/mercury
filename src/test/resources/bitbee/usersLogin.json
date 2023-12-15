@@ -1,0 +1,187 @@
+{
+  "user": {
+    "id": 651,
+    "shop": {
+      "id": 3,
+      "company": {},
+      "master": null,
+      "sector": {},
+      "resource": null,
+      "name": "TestTest",
+      "discount": 0,
+      "profit": 0,
+      "discountsum": 0,
+      "profitsum": 0,
+      "active": "Y",
+      "added": {
+        "date": "2022-04-29 12:47:36.000000",
+        "timezone_type": 3,
+        "timezone": "Europe\/Warsaw"
+      },
+      "modified": {
+        "date": "2022-04-29 12:47:36.000000",
+        "timezone_type": 3,
+        "timezone": "Europe\/Warsaw"
+      },
+      "properties": {
+        "currency": "1",
+        "language": "1",
+        "LOGO_ID": "14806",
+        "META_TITLE": "Platforma B2B-Online",
+        "META_DESCRIPTION": "Platforma B2B-Online",
+        "META_KEYWORDS": "",
+        "COMPANY_NAME_LINE1": "",
+        "COMPANY_NAME_LINE2": "",
+        "COMPANY_STREET": "",
+        "COMPANY_CITY": "",
+        "COMPANY_POSTCODE": "",
+        "CONTACT_PHONE": "",
+        "CONTACT_FAX": "",
+        "CONTACT_MOBILE": "",
+        "CONTACT_EMAIL": "",
+        "CONTACT_ORDER_EMAIL": "",
+        "CONTACT_SERVICE_EMAIL": ""
+      },
+      "license": {
+        "id": 2,
+        "license": {},
+        "reminder": 1,
+        "active": "Y",
+        "added": {
+          "date": "2022-12-14 11:17:21.000000",
+          "timezone_type": 3,
+          "timezone": "Europe\/Warsaw"
+        },
+        "finish": {
+          "date": "2025-12-15 02:29:11.000000",
+          "timezone_type": 3,
+          "timezone": "Europe\/Warsaw"
+        },
+        "modified": {
+          "date": "2022-12-14 11:17:21.000000",
+          "timezone_type": 3,
+          "timezone": "Europe\/Warsaw"
+        }
+      },
+      "logo": "https:\/\/cdndev.rbedi.net\/uploads\/3333\/images\/3333\/00000001.png"
+    },
+    "level": {
+      "id": 4,
+      "name": "Developer",
+      "added": {
+        "date": "-0001-11-30 00:00:00.000000",
+        "timezone_type": 3,
+        "timezone": "Europe\/Warsaw"
+      },
+      "modified": {
+        "date": "-0001-11-30 00:00:00.000000",
+        "timezone_type": 3,
+        "timezone": "Europe\/Warsaw"
+      }
+    },
+    "company": {
+      "id": 3,
+      "company": {},
+      "country": {},
+      "province": {},
+      "fullname": "ABC",
+      "shortname": "ABC",
+      "regon": "",
+      "krs": "",
+      "street": "Street A",
+      "flat": "2",
+      "postcode": "00-000",
+      "city": "Gotham",
+      "phone": "+48 000000000",
+      "account": "",
+      "bank": "",
+      "fax": "",
+      "email": "testowner@testowner.testowner.test",
+      "www": "",
+      "active": "Y",
+      "added": {
+        "date": "2022-04-29 12:47:36.000000",
+        "timezone_type": 3,
+        "timezone": "Europe\/Warsaw"
+      },
+      "modified": {
+        "date": "2022-04-29 12:47:36.000000",
+        "timezone_type": 3,
+        "timezone": "Europe\/Warsaw"
+      },
+      "fullAddress": "Polska 00-000, Street A 2"
+    },
+    "backup": {
+      "id": 660,
+      "user": {},
+      "province": {},
+      "country": {},
+      "company": {},
+      "resource": null,
+      "email": "testemail@test.test",
+      "forname": "Dev",
+      "surname": "Dev",
+      "street": "Testowa",
+      "flat": "15",
+      "city": "Pozna\u0144",
+      "postcode": "64-000",
+      "phone": "123123123",
+      "birthday": null,
+      "promotion": 1,
+      "active": "Y",
+      "added": {
+        "date": "2023-11-09 11:18:01.000000",
+        "timezone_type": 3,
+        "timezone": "Europe\/Warsaw"
+      },
+      "modified": {
+        "date": "2023-11-09 11:18:01.000000",
+        "timezone_type": 3,
+        "timezone": "Europe\/Warsaw"
+      }
+    },
+    "email": "testemail@test.test",
+    "password": "12345671234567123456712345688188",
+    "parent": null,
+    "lastlogin": {
+      "date": "2023-12-13 18:34:16.000000",
+      "timezone_type": 3,
+      "timezone": "Europe\/Warsaw"
+    },
+    "lastip": "192.16.111.111",
+    "regulation": "Y",
+    "newsletter": "Y",
+    "confirmed": "Y",
+    "active": "Y",
+    "added": {
+      "date": "2023-11-09 11:10:27.000000",
+      "timezone_type": 3,
+      "timezone": "Europe\/Warsaw"
+    },
+    "modified": {
+      "date": "2023-12-13 18:34:16.000000",
+      "timezone_type": 3,
+      "timezone": "Europe\/Warsaw"
+    },
+    "initials": "DD",
+    "color": "#1c57bc",
+    "fullname": "Dev Dev",
+    "pubkey": "C2222112222222222222222222oyOiJpZCI7aTo2NTE7czo5OiJ0aW1lc3RhbXAiO2k6MTcwMjQ4ODk5ODtzOjY6ImNoa3N1bSI7czozMjoiOWE3YWFkYmEyNTAyODI5YzBkZDY0OTM0OWFkOTExMWEiO30="
+  },
+  "publicKey": "C2222112222222222222222222oyOiJpZCI7aTo2NTE7czo5OiJ0aW1lc3RhbXAiO2k6MTcwMjQ4ODk5ODtzOjY6ImNoa3N1bSI7czozMjoiOWE3YWFkYmEyNTAyODI5YzBkZDY0OTM0OWFkOTExMWEiO30=",
+  "validate": true,
+  "redirect": "",
+  "itemsCount": 0,
+  "result": null,
+  "errors": [],
+  "encoding": "UTF-8",
+  "compress": true,
+  "exception": null,
+  "messages": [],
+  "code": 200,
+  "timestamp": {
+    "date": "2023-12-13 18:36:38.365382",
+    "timezone_type": 3,
+    "timezone": "Europe\/Warsaw"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "token": "eyXYZZEfdfddddddddd4444444444444444444IjoyLCJ2YWxpZCI6MCwidGltZXN0YW1wIjoxNzAyNDg4OTk4LCJpcCI6IjE4OC4zMy4yMzIuMTAyIiwiY2hrc3VtIjoiMjk0ZjkwMTVjYzNlYzcwYWQzMTNlNmMzYmRhYjZmNmEifQ==",
+  "validate": true,
+  "redirect": "",
+  "itemsCount": 0,
+  "result": null,
+  "errors": [],
+  "encoding": "UTF-8",
+  "compress": true,
+  "exception": null,
+  "messages": [],
+  "code": 200,
+  "timestamp": {
+    "date": "2023-12-13 18:36:38.093786",
+    "timezone_type": 3,
+    "timezone": "Europe\/Warsaw"
+  }
+}

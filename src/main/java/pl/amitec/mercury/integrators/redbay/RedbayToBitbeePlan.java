@@ -4,16 +4,14 @@ package pl.amitec.mercury.integrators.redbay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.amitec.mercury.MercuryException;
-import pl.amitec.mercury.clients.bitbee.types.Producer;
-import pl.amitec.mercury.clients.bitbee.types.Warehouse;
-import pl.amitec.mercury.engine.MercuryPlanConfigurator;
-import pl.amitec.mercury.engine.MercuryPlanRun;
 import pl.amitec.mercury.clients.bitbee.BitbeeClient;
 import pl.amitec.mercury.clients.bitbee.types.Category;
-import pl.amitec.mercury.clients.bitbee.types.ImportVariant;
+import pl.amitec.mercury.clients.bitbee.types.Producer;
 import pl.amitec.mercury.clients.bitbee.types.Stock;
-import pl.amitec.mercury.clients.bitbee.types.TranslatedName;
-import pl.amitec.mercury.clients.bitbee.types.VariantAttr;
+import pl.amitec.mercury.clients.bitbee.types.Warehouse;
+import pl.amitec.mercury.clients.bitbee.types.*;
+import pl.amitec.mercury.engine.MercuryPlanConfigurator;
+import pl.amitec.mercury.engine.MercuryPlanRun;
 import pl.redbay.ws.client.GizaAPIPortType;
 import pl.redbay.ws.client.RedbayCxfClient;
 import pl.redbay.ws.client.types.*;
@@ -107,7 +105,7 @@ public class RedbayToBitbeePlan implements MercuryPlanConfigurator {
                         //.status(Optional.of(rbProduct.getActive()))
                         .status(Optional.of("Y"))
                         .lang(getLanguage(rbProduct))
-                        .debug(Optional.empty())
+                        //.debug(Optional.empty())
                         .producer(makeProducer(rbProduct, source))
                         .name(getName(rbProduct, lang))
                         .categories(makeCategories(rbProduct))
@@ -127,14 +125,14 @@ public class RedbayToBitbeePlan implements MercuryPlanConfigurator {
         });
     }
 
-    private static Optional<Producer> makeProducer(Product product, String source) {
+    private static Producer makeProducer(Product product, String source) {
         return Optional.ofNullable(product.getProducer()).map(producer ->
                 Producer.builder()
                         .source(source)
                         .sourceId(producer.getId().toString())
                         .name(producer.getName())
                         .build()
-        );
+        ).orElse(null);
     }
 
     public List<Stock> makeStocks(BitbeeClient bbc, String source, Variant variant, final Map<String, Warehouse> bbWarehouseMap) {

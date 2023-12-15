@@ -9,14 +9,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.amitec.mercury.TestUtil;
+import pl.amitec.mercury.clients.bitbee.types.JournalItem;
+import pl.amitec.mercury.clients.bitbee.types.Order;
 import pl.amitec.mercury.clients.bitbee.types.Warehouse;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static pl.amitec.mercury.TestUtil.readFile;
 
 @ExtendWith(MockitoExtension.class)
 public class BitbeeClientTest {
@@ -41,6 +50,14 @@ public class BitbeeClientTest {
                        "bitbee.auth_id", "testid",
                        "bitbee.auth_pass",  "testpass",
                        "bitbee.readonly", "false"));
+        wireMockServer.stubFor(get(urlPathEqualTo("/api/authorization/token")
+                ).withHeader("Accept", containing("application/json"))
+                .willReturn(aResponse().withBody(readFile("bitbee/authorizationToken.json"))));
+        wireMockServer.stubFor(post(urlPathEqualTo("/api/users/login")
+        ).withHeader("Accept", containing("application/json"))
+                .willReturn(aResponse()
+                        .withHeader("refreshed-token", "testtoken")
+                        .withBody(readFile("bitbee/usersLogin.json"))));
     }
 
     @Test
@@ -63,7 +80,7 @@ public class BitbeeClientTest {
         var taxes = cli.getTaxes();
         assertEquals(6, taxes.size());
         var tax23 = taxes.get(1);
-        assertEquals(23, tax23.percent());
+        assertEquals(BigDecimal.valueOf(23), tax23.percent());
         assertEquals(2, tax23.id());
     }
 
@@ -117,6 +134,29 @@ public class BitbeeClientTest {
         assertEquals("Main warehouse", result.name());
     }
 
+    @Test
+    public void test_getOrderJournalItems() throws URISyntaxException, IOException {
+        String journalItemsJson = new String(Files.readAllBytes(Paths.get(getClass().getResource("/bitbee/journalItems.json").toURI())));
 
+        wireMockServer.stubFor(get(urlPathEqualTo("/api/journal"))
+                        //.withQueryParam("limit", equalTo("100"))
+                        .withQueryParam("type", equalTo("order"))
+                .withHeader("Content-Type", containing("application/json"))
+                .willReturn(aResponse().withBody(journalItemsJson)));
+        List<JournalItem> orders = cli.getOrdersJournal();
+        assertEquals(3, orders.size());
+    }
+
+    @Test
+    public void test_getOrder() {
+        String journalItemsJson = TestUtil.readFile("bitbee/order.json");
+
+        wireMockServer.stubFor(get(urlPathEqualTo("/api/order/400"))
+                .withHeader("Content-Type", containing("application/json"))
+                .willReturn(aResponse().withBody(journalItemsJson)));
+        Order order = cli.getOrder("400").get();
+        assertEquals(400, order.id());
+        assertEquals(3, order.positions().size());
+    }
 
 }

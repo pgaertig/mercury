@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import feign.Feign;
+import feign.Logger;
 import feign.http2client.Http2Client;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
@@ -29,6 +30,7 @@ public class DynamicsClient {
                 .decoder(new JacksonDecoder(objectMapper))
                 .errorDecoder(new DynamicsErrorDecoder(authSession))
                 .logger(new Slf4jLogger(DynamicsBCAPI.class))
+                .logLevel(Logger.Level.FULL)
                 .requestInterceptor(oAuth2FeignRequestInterceptor)
                 .target(DynamicsBCAPI.class, baseUrl);
     }

@@ -1,0 +1,127 @@
+{
+  "list": [
+    {
+      "id": 12,
+      "shop": 2,
+      "name": "",
+      "short": ""
+    },
+    {
+      "id": 12739,
+      "shop": 3,
+      "name": "109",
+      "short": "109"
+    },
+    {
+      "id": 13,
+      "shop": 2,
+      "name": "KOMP",
+      "short": "KOMP"
+    },
+    {
+      "id": 6,
+      "shop": 2,
+      "name": "KPL",
+      "short": "KPL"
+    },
+    {
+      "id": 12741,
+      "shop": 3,
+      "name": "kpl",
+      "short": "kpl"
+    },
+    {
+      "id": 3,
+      "shop": 2,
+      "name": "miesi\u0105c",
+      "short": "m-c"
+    },
+    {
+      "id": 2,
+      "shop": 2,
+      "name": "og\u0142oszenie",
+      "short": "og\u0142."
+    },
+    {
+      "id": 11,
+      "shop": 2,
+      "name": "OP",
+      "short": "OP"
+    },
+    {
+      "id": 5,
+      "shop": 2,
+      "name": "opakowania",
+      "short": "op."
+    },
+    {
+      "id": 8,
+      "shop": 2,
+      "name": "OPK",
+      "short": "OPK"
+    },
+    {
+      "id": 12738,
+      "shop": 3,
+      "name": "opk",
+      "short": "opk"
+    },
+    {
+      "id": 12737,
+      "shop": 3,
+      "name": "SOPK",
+      "short": "SOPK"
+    },
+    {
+      "id": 7,
+      "shop": 2,
+      "name": "SZT",
+      "short": "SZT"
+    },
+    {
+      "id": 9,
+      "shop": 2,
+      "name": "szt",
+      "short": "szt"
+    },
+    {
+      "id": 12740,
+      "shop": 3,
+      "name": "SZT]",
+      "short": "SZT]"
+    },
+    {
+      "id": 1,
+      "shop": 2,
+      "name": "sztuki",
+      "short": "szt."
+    },
+    {
+      "id": 4,
+      "shop": 2,
+      "name": "us\u0142uga",
+      "short": "us\u0142."
+    },
+    {
+      "id": 10,
+      "shop": 2,
+      "name": "ZES",
+      "short": "ZES"
+    }
+  ],
+  "validate": true,
+  "redirect": "",
+  "itemsCount": 18,
+  "result": null,
+  "errors": [],
+  "encoding": "UTF-8",
+  "compress": true,
+  "exception": null,
+  "messages": [],
+  "code": 200,
+  "timestamp": {
+    "date": "2023-12-15 19:26:28.849106",
+    "timezone_type": 3,
+    "timezone": "Europe\/Warsaw"
+  }
+}

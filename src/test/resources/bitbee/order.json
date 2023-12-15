@@ -1,0 +1,178 @@
+{
+  "object": {
+    "id": 400,
+    "uniqueNumber": "TEST003-000400",
+    "payment": {
+      "id": 20953,
+      "name": "Przelew",
+      "provision": 0
+    },
+    "delivery": {
+      "id": 1,
+      "name": "Kurier",
+      "tax": null,
+      "payments": [],
+      "cost": 0
+    },
+    "status": {
+      "id": 1,
+      "type": "WAITING",
+      "name": "oczekuj\u0105ce",
+      "visiblename": "oczekuj\u0105ce",
+      "description": "Zam\u00f3wienia oczekuj\u0105ce na potwierdzenie"
+    },
+    "added": {
+      "date": "2023-09-22 15:34:44.000000",
+      "timezone_type": 3,
+      "timezone": "Europe\/Warsaw"
+    },
+    "modified": {
+      "date": "2023-09-22 15:34:44.000000",
+      "timezone_type": 3,
+      "timezone": "Europe\/Warsaw"
+    },
+    "source": "B2B",
+    "sourceid": "3bf3f561-36f3-48ac-9fbb-37972ad070ea",
+    "netto": 1268.35,
+    "tax": 127.36,
+    "brutto": 1395.70,
+    "comment": "",
+    "contact": {
+      "company": {
+        "id": 3823,
+        "nip": "111111111",
+        "regon": "",
+        "fullname": "XYZ",
+        "street": "Street 1",
+        "flat": "",
+        "postcode": "00-000",
+        "city": "City",
+        "country": 1,
+        "province": 15,
+        "phone": "000000000",
+        "email": "testtest@testtest.test",
+        "source": "ps1",
+        "sourceid": "10689",
+        "type": 1,
+        "properties": null
+      },
+      "id": 2156,
+      "forname": "John",
+      "surname": "Doe",
+      "phone": "00000000",
+      "email": "testtest@testtest.test",
+      "street": "Street 1",
+      "flat": "",
+      "postcode": "00-000",
+      "city": "City",
+      "country": 1,
+      "province": 17
+    },
+    "receiver": {
+      "id": 2155,
+      "forname": "John",
+      "surname": "Doe",
+      "phone": "000000000",
+      "email": "testtest@testtest.test",
+      "street": "Street 1",
+      "flat": "",
+      "postcode": "00-000",
+      "city": "City",
+      "country": 1,
+      "province": 17
+    },
+    "invoice": {
+      "company": {
+        "id": 3823,
+        "nip": "111111111",
+        "regon": "",
+        "fullname": "XYZ",
+        "street": "Stree 1",
+        "flat": "",
+        "postcode": "00-000",
+        "city": "City",
+        "country": 1,
+        "province": 15,
+        "phone": "000000000",
+        "email": "testtest@testtest.test",
+        "source": "ps1",
+        "sourceid": "10689",
+        "type": 1,
+        "properties": null
+      },
+      "id": 2157,
+      "forname": "John",
+      "surname": "Doe",
+      "phone": "000000000",
+      "email": "testtest@testtest.test",
+      "street": "Street 1",
+      "flat": "",
+      "postcode": "00-000",
+      "city": "City",
+      "country": 1,
+      "province": 17
+    },
+    "positions": [
+      {
+        "id": 6813,
+        "variant": 15990,
+        "variantName": "SMOCZEK 12",
+        "variantSource": "ps1",
+        "variantSourceId": "35846",
+        "name": "SMOCZEK 12",
+        "code": "18\/12",
+        "price": 16.92,
+        "quantity": 3,
+        "tax": 7,
+        "taxName": null,
+        "warehouse": 3,
+        "comment": "zielony"
+      },
+      {
+        "id": 6814,
+        "variant": 16227,
+        "variantName": "SMOCZEK 13",
+        "variantSource": "ps1",
+        "variantSourceId": "54712",
+        "name": "SMOCZEK 13",
+        "code": "21\/12",
+        "price": 3.69,
+        "quantity": 1,
+        "tax": 7,
+        "taxName": null,
+        "warehouse": 3,
+        "comment": ""
+      },
+      {
+        "id": 6815,
+        "variant": 8167,
+        "variantName": "SMOCZ.21",
+        "variantSource": "ps1",
+        "variantSourceId": "4642",
+        "name": "SMOCZ.21",
+        "code": "21\/21",
+        "price": 3.69,
+        "quantity": 8,
+        "tax": 7,
+        "taxName": null,
+        "warehouse": 3,
+        "comment": ""
+      }
+    ]
+  },
+  "validate": true,
+  "redirect": "",
+  "itemsCount": 0,
+  "result": null,
+  "errors": [],
+  "encoding": "UTF-8",
+  "compress": true,
+  "exception": null,
+  "messages": [],
+  "code": 200,
+  "timestamp": {
+    "date": "2023-12-14 11:35:27.584590",
+    "timezone_type": 3,
+    "timezone": "Europe\/Warsaw"
+  }
+}

@@ -3,7 +3,7 @@ package pl.amitec.mercury.server.rest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pl.amitec.mercury.server.IntegratorDiscovery;
+import pl.amitec.mercury.server.IntegratorRepository;
 
 import java.util.List;
 
@@ -11,9 +11,9 @@ import java.util.List;
 @RequestMapping("/integrators")
 public class IntegrationsController {
 
-    private IntegratorDiscovery integratorDiscovery;
+    private IntegratorRepository integratorDiscovery;
     public IntegrationsController(
-            IntegratorDiscovery integratorDiscovery) {
+            IntegratorRepository integratorDiscovery) {
         this.integratorDiscovery = integratorDiscovery;
     }
 

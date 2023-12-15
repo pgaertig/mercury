@@ -11,10 +11,10 @@ public class PlanExecutor {
     private static final Logger LOG = LoggerFactory.getLogger(PlanExecutor.class);
     private final FlowControl flowControl;
     private final ConfigMapper configMapper;
-    private final IntegratorDiscovery integratorDiscovery;
+    private final IntegratorRepository integratorDiscovery;
 
     public PlanExecutor(FlowControl flowControl,
-                        IntegratorDiscovery integratorDiscovery,
+                        IntegratorRepository integratorDiscovery,
                         ConfigMapper configMapper) {
         this.flowControl = flowControl;
         this.integratorDiscovery = integratorDiscovery;
@@ -32,6 +32,12 @@ public class PlanExecutor {
             public <T extends Configurable> T loadConfig(Class<T> object) {
                 return configMapper.map(plan.config(), object);
             }
+
+            @Override
+            public TaskExecutor getTaskExecutor() {
+                return flowControl.getExecutorService(plan.name());
+            }
+
         };
 
         flowControl.run(plan.name(), () -> {
