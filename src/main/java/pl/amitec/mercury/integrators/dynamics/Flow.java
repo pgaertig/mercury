@@ -16,6 +16,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -52,15 +53,14 @@ public class Flow {
             try {
                 String source = planExecution.getPlan().name();
 
-/*                LOG.info("Clients sync");
+                LOG.info("Clients sync");
                 dynamicsAPI.getWorkflowCustomers().list().forEach(
                         customer -> {
                             LOG.info("Dynamics customer: {}", customer.name());
                             syncClient(customer);
                         });
-                        */
 
-/*                LOG.info("Sync variants");
+                LOG.info("Sync variants");
                 String lang = "pl";
                 Warehouse warehouse = bitbeeClient.getOrCreateWarehouse(Warehouse.builder()
                         .name(STR."Magazyn")
@@ -74,9 +74,8 @@ public class Flow {
                             LOG.info("Dynamics variant: {}", item.description());
                             //TODO cache
                             syncVariant(item, source, lang, warehouse);
-                        });*/
+                        });
 
-                /*
                 Map<String, Company> companyCache = new ConcurrentHashMap<>();
                 Function<String, Company> companyLookup = (String sourceId) -> companyCache.computeIfAbsent(sourceId, (id) -> {
                     var company = bitbeeClient.getCompanyBySourceId(source, id);
@@ -84,16 +83,15 @@ public class Flow {
                         throw new RuntimeException("Company not found source=" + id);
                     }
                     return company.get();
-                });*/
+                });
 
-                /*
                 dynamicsAPI.getSalesInvoices().list().forEach(
                         invoice -> {
                             LOG.info("Dynamics invoice: {}", invoice.no());
                             //TODO cache
                             syncInvoice(invoice, source, companyLookup);
                         });
-                */
+
                 syncOrders();
                 Thread.sleep(Duration.ofMinutes(1)); //virtual-thread yield
             } catch (InterruptedException e) {
@@ -201,8 +199,8 @@ public class Flow {
                     Collectors.toMap(Tax::id,Tax::percent));
             ordersJournalItems.forEach(
                     journalItem -> {
-                        syncOrder(journalItem, source,taxes);
-                        //bitbeeClient.confirmJournalItem(journalItem);
+                            syncOrder(journalItem, source, taxes);
+                            bitbeeClient.confirmJournalItem(journalItem);
                     });
         }
 
@@ -211,7 +209,7 @@ public class Flow {
     private void syncOrder(JournalItem journalItem, String source, Map<Long, BigDecimal> taxPercents) {
         LOG.info("Sync order {}", journalItem.objectId());
         Order bbOrder = bitbeeClient.getOrder(journalItem.objectId())
-                .orElseThrow(() -> new RuntimeException("Orphan Journal item has no Order: " + journalItem.objectId()));
+                .orElseThrow(() -> new RuntimeException(STR."Orphan Journal item has no Order: \{journalItem.objectId()}"));
         AtomicLong lineNo = new AtomicLong(1);
         bbOrder.positions().stream().forEach(orderPosition -> {
                     var salesOrder = SalesOrder.builder()
@@ -221,12 +219,13 @@ public class Flow {
                             .customerName(bbOrder.contact().company().fullname())
                             .externalDocumentNo("")
                             .documentDate(bbOrder.added().toLocalDate())
-                            .contact(bbOrder.contact().forname() + " " + bbOrder.contact().surname())
+                            .contact(STR."\{bbOrder.contact().forname()} \{bbOrder.contact().surname()}")
                             .lineNo(lineNo.getAndIncrement())
                             .lineType("ITEM")
                             .no(orderPosition.code())
                             .description(orderPosition.variantName())
                             .quantity(orderPosition.quantity().longValue())
+                            .unitOfMeasure("PSC") //TODO fix when BB API returns the unit
                             //.unitOfMeasure(orderPosition.unit()) //FIXME
                             .unitPrice(orderPosition.price())
                             .vatPercent(taxPercents.get(orderPosition.tax()))

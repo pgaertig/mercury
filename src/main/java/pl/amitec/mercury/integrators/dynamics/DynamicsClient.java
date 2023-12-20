@@ -1,6 +1,7 @@
 package pl.amitec.mercury.integrators.dynamics;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -20,6 +21,7 @@ public class DynamicsClient {
         OAuth2FeignRequestInterceptor oAuth2FeignRequestInterceptor = new OAuth2FeignRequestInterceptor(authSession);
         objectMapper = JsonMapper.builder()
                 .addModule(new Jdk8Module())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .addModule(new JavaTimeModule())
                 .build();
 

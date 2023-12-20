@@ -2,9 +2,8 @@ package pl.amitec.mercury.integrators.dynamics;
 
 import pl.amitec.mercury.integrators.dynamics.model.*;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 
 public interface DynamicsBCAPI {
     @GET
@@ -28,5 +27,7 @@ public interface DynamicsBCAPI {
 
     @POST
     @Path("/SalesOrderImportWS")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     ListValue<SalesOrder> postSalesOrders(SalesOrder salesOrders);
 }

@@ -77,7 +77,9 @@ public class MercuryApp implements ApplicationListener<ContextRefreshedEvent> {
         return new TaskExecutorAdapter(Executors.newVirtualThreadPerTaskExecutor());
     }
 
-    @Bean
+    //@Bean
+    /* Startup locking issues */
+    @Deprecated
     public TomcatProtocolHandlerCustomizer<?> protocolHandlerVirtualThreadExecutorCustomizer() {
         return protocolHandler -> {
             protocolHandler.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
