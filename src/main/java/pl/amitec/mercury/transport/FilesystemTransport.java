@@ -2,10 +2,18 @@ package pl.amitec.mercury.transport;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
-import java.nio.file.*;
-import java.util.*;
-import java.util.stream.*;
+import java.nio.charset.CodingErrorAction;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FilesystemTransport implements Transport {
 
@@ -78,7 +86,18 @@ public class FilesystemTransport implements Transport {
             throw new TransportException("Read only " + directory);
         }
         try {
-            Files.writeString(directory.resolve(path), content, charset);
+            Path filePath = directory.resolve(path);
+            Path parent = filePath.getParent();
+            if (parent != null && !Files.exists(parent)) {
+                Files.createDirectories(parent);
+            }
+
+            ByteBuffer encoded = charset.newEncoder()
+                    .onUnmappableCharacter(CodingErrorAction.REPLACE)
+                    .replaceWith("_".getBytes())
+                    .encode(CharBuffer.wrap(content));
+
+            Files.write(filePath, encoded.array());
         } catch (IOException e) {
             throw new TransportException(this, e);
         }
