@@ -171,7 +171,7 @@ public class BitbeeClient {
     }
 
     public Optional<Company> getCompanyBySourceId(String source, String sourceId) {
-        return first(getCompanies(Map.of("source", source, "source_id", sourceId)));
+        return first(getCompanies(sourceFilter(source, sourceId)));
     }
 
     // Invoices
@@ -185,7 +185,7 @@ public class BitbeeClient {
     }
 
     public Optional<InvoiceListElement> getInvoiceBySourceId(String source, String sourceId) {
-        return first(getInvoices(Map.of("source", source, "source_id", sourceId)));
+        return first(getInvoices(sourceFilter(source, sourceId)));
     }
 
     public Optional<Invoice> getInvoiceById(String id) {
@@ -240,10 +240,37 @@ public class BitbeeClient {
         put("journal/" + item.id() + "/confirm", null);
     }
 
+    //Resources
+    public List<Resource> getResources(Map<String, Object> params) {
+        return getList("resources", new TypeReference<>() {}, params);
+    }
+
+    public Optional<Resource> getResourceBySourceAndSourceId(String source, String sourceId) {
+        return first(getResources(sourceFilter(source, sourceId)));
+    }
+
+    public Optional<Resource> createResource(Resource resource) {
+        return post("resource", resource);
+    }
+
+    public Optional<Resource> updateResource(Resource resource) {
+        return put("resource/" + resource.id(), resource);
+    }
+
+    public Resource createOrUpdateResource(Resource resource) {
+        if (resource.id() == null) {
+            return createResource(resource).orElseThrow();
+        } else {
+            return updateResource(resource).orElse(resource);
+        }
+    }
+
+    //Taxes
     public List<Tax> getTaxes() {
         return getList("taxes", new TypeReference<>() {});
     }
 
+    //Warehouses
     public List<Warehouse> getWarehouses() {
         return getList("warehouses", new TypeReference<>() {});
     }
@@ -256,7 +283,7 @@ public class BitbeeClient {
     public Optional<Warehouse> getWarehouseBySourceAndSourceId(String source, String sourceId) {
         List<Warehouse> warehouses = getList("warehouses",
                 new TypeReference<>() {},
-                Map.of("source", source, "source_id", sourceId));
+                sourceFilter(source, sourceId));
 
         if (warehouses.isEmpty()) {
             return Optional.empty();
@@ -267,6 +294,21 @@ public class BitbeeClient {
 
     public Warehouse createWarehouse(Warehouse warehouse) {
         return post("warehouse", warehouse).orElseThrow();
+    }
+
+    // Product
+    public Optional<ProductPicturesDto> assignProductPictures(String productId, List<Resource> resources) {
+        return put("product/" + productId + "/picture",
+                ProductPicturesDto.builder().pictures(
+                        resources.stream().map(r -> ProductPicture.builder()
+                                .id(r.id())
+                                .url(r.url())
+                                .filetype(r.fileType())
+                                .source(r.source())
+                                .sourceid(r.sourceId())
+                                .build()
+                        ).toList()
+                ).build());
     }
 
 
@@ -370,7 +412,7 @@ public class BitbeeClient {
     protected String putJson(String apiCall, String json) {
         String url = uri + "/" + apiCall;
         if (dryRun) {
-            LOG.info("Dry-run, ignore POST to {} with body {}", url, truncate(json, 40, true));
+            LOG.info("Dry-run, ignore PUT to {} with body {}", url, truncate(json, 40, true));
             return null;
         }
         HttpRequest request = authorizedRequestBuilder(url)
@@ -455,6 +497,10 @@ public class BitbeeClient {
                         "Authorization", "Bearer " + token,
                         "Content-Type", "application/json",
                         "User-Public-Key", userPublicKey);
+    }
+
+    private static Map<String, Object> sourceFilter(String source, String sourceId) {
+        return Map.of("source", source, "source_id", sourceId);
     }
 
 }
