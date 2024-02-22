@@ -15,12 +15,17 @@ public class VirtualThreadFlowControl implements FlowControl {
 
     private static final Logger LOG = LoggerFactory.getLogger(VirtualThreadFlowControl.class);
     private String logsPath;
+    private TaskExecutor taskExecutor;
 
     public VirtualThreadFlowControl(@Value("${mercury.plan.logs.path}") String logsPath) {
         this.logsPath = logsPath;
     }
 
     public void run(String name, Runnable runnable) {
+        startLoggingThread(name, null, runnable);
+    }
+
+    private Thread startLoggingThread(String name, String subTask, Runnable runnable) {
         String plan = MDC.get("plan");
         String planLog = MDC.get("plan-log");
         if (plan == null || planLog == null) {
@@ -28,16 +33,29 @@ public class VirtualThreadFlowControl implements FlowControl {
             planLog = String.format("%s/%s/", logsPath, name);
             LOG.info("Logging plan {} to {}", plan, planLog);
         }
-        String finalPlan = plan;
-        String finalPlanLog = planLog;
-        Thread.ofVirtual().name(name).start(() -> {
+        final String finalPlan = plan;
+        final String finalPlanLog = planLog;
+        final String finalName = subTask == null ? name : name + "/" + subTask;
+        return Thread.ofVirtual().name(finalName).start(() -> {
             MDC.put("plan", finalPlan);
             MDC.put("plan-log", finalPlanLog);
+            LOG.info("Logging plan {} to {}", finalName, finalPlanLog);
             runnable.run();
         });
     }
 
+    @Override
     public TaskExecutor getExecutorService(String name) {
-        throw new UnsupportedOperationException();
+        return new TaskExecutor() {
+            @Override
+            public void execute(String subTask, Runnable runnable) {
+                startLoggingThread(name, subTask, runnable);
+            }
+
+            @Override
+            public void join() {
+                throw new UnsupportedOperationException("join");
+            }
+        };
     }
 }

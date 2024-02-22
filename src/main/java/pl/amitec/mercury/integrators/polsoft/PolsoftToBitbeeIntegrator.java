@@ -24,6 +24,6 @@ public class PolsoftToBitbeeIntegrator implements Integrator {
     }
 
     public void run() throws MercuryException, InterruptedException {
-        PsFlow.configure(planExecution.getPlan().config()).watch();
+        PsFlow.configure(planExecution.getPlan().config()).watch(planExecution);
     }
 }

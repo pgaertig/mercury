@@ -34,7 +34,12 @@ public class OrderSync {
             return;
         }
         journalOrders.forEach((item) -> {
-            processOrder(ctx, item, importDir);
+            //TODO unit
+            try {
+                processOrder(ctx, item, importDir);
+            } catch (RuntimeException ex) {
+                LOG.error("Error processing order {}", item, ex);
+            }
         });
     }
 
