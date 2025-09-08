@@ -6,6 +6,9 @@ import pl.amitec.mercury.JobContext;
 import pl.amitec.mercury.clients.bitbee.BitbeeClient;
 import pl.amitec.mercury.clients.bitbee.types.*;
 import pl.amitec.mercury.formats.CSVHelper;
+import pl.amitec.mercury.integrators.polsoft.mappers.PsMappers;
+import pl.amitec.mercury.integrators.polsoft.model.PsStock;
+import pl.amitec.mercury.integrators.polsoft.model.PsStocks;
 import pl.amitec.mercury.transport.Transport;
 
 import java.io.IOException;
@@ -22,13 +25,14 @@ public class VariantSync {
     public Set<String> sync(JobContext jobContext,
                                 Transport deptDir, String dept, Set<String> selectedSourceIds) {
         var csvHelper = new CSVHelper();
+        var psMappers = new PsMappers();
 
         try(var stocksReader = deptDir.reader("stany.txt");
             var producersReader = deptDir.reader("produc.txt");
             var groupsReader = deptDir.reader("grupy.txt");
             var productReader = deptDir.reader("towary.txt")
         ) {
-            var stocks = csvHelper.mapCSV(stocksReader, "towar_numer", "towar_ilosc");
+            var psStocks = psMappers.mapStocks(stocksReader);
             var producers = csvHelper.mapCSV(producersReader, "prd_numer", "prd_nazwa");
             var groups = csvHelper.mapCSV(groupsReader, "categories_id", "categories_name");
 
@@ -45,7 +49,7 @@ public class VariantSync {
 
             csvHelper.streamCSV(productReader).forEach(product -> {
                 syncProduct(jobContext, dept, product, selectedSourceIds,
-                        producers, groups, warehouse.id().toString(), stocks)
+                        producers, groups, warehouse.id().toString(), psStocks)
                         .ifPresent(variantSourceIds::add);
             });
 
@@ -60,12 +64,13 @@ public class VariantSync {
             String dept, Map<String, String> product, Set<String> selectedSourceIds,
             Map<String, String> producers,
             Map<String, String> groups,
-            String warehouseId, Map<String, String> stocks) {
+            String warehouseId, PsStocks psStocks) {
         var source = jobContext.getSource();
         var sourceId = product.get("towar_numer");
         if(selectedSourceIds != null && !selectedSourceIds.contains(product.get("towar_numer"))) {
             return Optional.empty();
         }
+        PsStock stock = psStocks.map().getOrDefault(sourceId, PsStock.builder().amount("0").build());
 
         var variant = ImportVariant.builder()
                 .code(sourceId)
@@ -100,13 +105,15 @@ public class VariantSync {
                         Optional.ofNullable(product.get("towar_kod")).map(value ->
                                 new VariantAttr("KOD", "KOD", value, "pl")
                         ).orElse(null),
-                        new VariantAttr("DATA WAŻNOŚCI", "DATA WAŻNOŚCI", product.get("najkrotsza_data"), "pl")
+                        Optional.ofNullable(stock.shortestExpirationDate()).map(value ->
+                                new VariantAttr("DATA WAŻNOŚCI", "DATA WAŻNOŚCI", value, "pl")
+                        ).orElse(null)
                 ))
                 .stocks(List.of(Stock.builder()
                                 .sourceId(String.format("%s:%s", dept, sourceId))
                                 .source(source)
                                 .warehouseId(warehouseId)
-                                .quantity(stocks.getOrDefault(sourceId, "0"))
+                                .quantity(stock.amount())
                                 .price(product.get("towar_cena1")).build()))
                 .build();
 

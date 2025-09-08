@@ -8,7 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CSVHelper {
@@ -25,6 +28,10 @@ public class CSVHelper {
                 .setSkipHeaderRecord(true)
                 .setAllowMissingColumnNames(true)
                 .build();
+    }
+
+    public CSVParser parse(Reader lines) throws IOException {
+        return csvFormat.parse(lines);
     }
 
     public class CSVRecordMap extends AbstractMap<String, String> {
