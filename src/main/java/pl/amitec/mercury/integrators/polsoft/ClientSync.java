@@ -4,15 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.amitec.mercury.JobContext;
-import pl.amitec.mercury.dict.PostCodes;
 import pl.amitec.mercury.clients.bitbee.BitbeeClient;
 import pl.amitec.mercury.clients.bitbee.types.ImportClient;
 import pl.amitec.mercury.clients.bitbee.types.StockDiscount;
+import pl.amitec.mercury.dict.PostCodes;
 import pl.amitec.mercury.transport.Transport;
 
 import java.util.List;
 
-import static pl.amitec.mercury.util.Utils.*;
+import static pl.amitec.mercury.util.Utils.orderedMapOfStrings;
 
 public class ClientSync implements PsCommonSync {
 
@@ -67,7 +67,7 @@ public class ClientSync implements PsCommonSync {
 
         var clientDto = ImportClient.builder()
                 .sourceId(id)
-                .source("polsoft")
+                .source(jobContext.getSource())
                 .name(String.format("%s %s", client.get("kt_nazwa"), client.get("kt_nazwa_pom")).trim())
                 .email(client.get("kt_email"))
                 .phone(client.getOrDefault("kt_telefon","").trim())
@@ -82,7 +82,8 @@ public class ClientSync implements PsCommonSync {
                         "iph_pricetype", client.get("kt_rodzaj_ceny"),
                         "iph_discount", client.get("kt_rabat_auto"),
                         "iph_debt", client.get("kt_zadluzenie"),
-                        "iph_sector", client.get("kategoria_1")
+                        "iph_sector", client.get("kategoria_1"),
+                        "iph_logistic", client.get("kt_trasa")
                 ))
                 .stockDiscounts(
                         clientWithDiscounts.getDiscounts().entrySet().stream().map(entry ->

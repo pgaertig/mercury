@@ -58,8 +58,10 @@ class OrderSyncTest {
     @Test
     public void test() throws IOException {
         new OrderSync().sync(jobContext, deptDir, "1");
+        when(deptDir.subdir("IMPORT_ODDZ_1")).thenReturn(deptDir);
 
         verify(rbc).confirmJournalItem(eq("59"));
+        verify(deptDir).subdir("IMPORT_ODDZ_1");
 
         verify(deptDir).write(matches("^N[0-9]+\\.146\\.txt$"), eq("""
                 nrfak\trodzdok\tnrodb\tidhandl\tdatasp\tuwagi

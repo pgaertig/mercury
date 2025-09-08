@@ -24,6 +24,7 @@ public class OrderSync {
     private static final Pattern UNIQUE_NUMBER_PATTERN = Pattern.compile("^RB0*(\\d+)-0*(\\d+)$");
     public void sync(JobContext ctx, Transport transport, String dept) {
         Transport importDir = transport.subdir(String.format("IMPORT_ODDZ_%s", dept));
+        LOG.info("Syncing orders for importDir={}", importDir);
         ArrayNode journalOrders = (ArrayNode) ctx.bitbeeClient().getOrdersJournalJson().path("list");
 
         if(!journalOrders.isArray()) {
@@ -47,6 +48,7 @@ public class OrderSync {
         var journalId = item.get("id").asText();
         var orderId = item.get("objectId").asText();
         var order = ctx.bitbeeClient().getOrderJson(orderId);
+        var source = ctx.getSource();
 
         if(order == null) {
             LOG.info("Order {} not found in backend", orderId);
@@ -105,7 +107,7 @@ public class OrderSync {
             throw new RuntimeException(e);
         }
 
-        if (sources.contains("polsoft")) { // TODO change to dynamic source
+        if (sources.contains(source)) {
             LOG.debug("Header data: {}", headerData.toString());
             LOG.debug("Positions data: {}", positionsData.toString());
 
@@ -114,7 +116,7 @@ public class OrderSync {
             importDir.write("P" + marker + ".txt", positionsData.toString());
             importDir.write("f" + marker + ".txt", "");
         } else {
-            LOG.debug("Order {} has no positions for source {}", orderId, "polsoft"); // TODO multisource
+            LOG.debug("Order {} has no positions for source {}", orderId, source);
         }
 
         ctx.bitbeeClient().confirmJournalItem(journalId);

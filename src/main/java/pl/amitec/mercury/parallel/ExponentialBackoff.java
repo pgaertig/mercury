@@ -11,8 +11,8 @@ public class ExponentialBackoff {
 
         private static final Random random = new Random();
 
-        public static void run(int maxTries, int initialDelay, Runnable task) throws Exception {
-            long curDelay = initialDelay;
+        public static void run(int maxTries, int initialDelaySec, Runnable task) throws Exception {
+            long curDelay = initialDelaySec;
             int curTries = 1;
 
             while (curTries <= maxTries) {

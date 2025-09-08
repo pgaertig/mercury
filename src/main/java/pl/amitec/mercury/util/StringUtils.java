@@ -32,4 +32,13 @@ public class StringUtils {
 
         return truncatedString;
     }
+
+    public static String nonEmpty(String... strings) {
+        for (String string : strings) {
+            if (string != null && !string.isEmpty()) {
+                return string;
+            }
+        }
+        return null;
+    }
 }

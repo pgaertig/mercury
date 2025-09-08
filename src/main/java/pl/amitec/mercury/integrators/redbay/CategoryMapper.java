@@ -4,8 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.amitec.mercury.clients.bitbee.types.Category;
 import pl.amitec.mercury.clients.bitbee.types.TranslatedName;
-import pl.redbay.ws.client.types.ArrayOfCategories;
-import pl.redbay.ws.client.types.CategoryTranslation;
+import pl.redbay.ws.client.types.RbArrayOfCategories;
+import pl.redbay.ws.client.types.RbCategoryTranslation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,21 +21,27 @@ public class CategoryMapper {
     private static final Logger LOG = LoggerFactory.getLogger(CategoryMapper.class);
     private Map<String, List<Category>> categoryPaths = new HashMap<>();
 
-    public CategoryMapper(ArrayOfCategories topCategories) {
+    public CategoryMapper(RbArrayOfCategories topCategories) {
         mapRbCategoryTreeToBBCategoryPaths(List.of(), topCategories);
     }
 
-    public List<Category> getBitbeeCategoryPath(ArrayOfCategories productCategories) {
+    public List<Category> getBitbeeCategoryPath(RbArrayOfCategories productCategories) {
         if(productCategories == null || productCategories.getItems().isEmpty()) {
             return List.of();
         } else {
-            return categoryPaths.get(productCategories.getItems().getLast().getId());
+            List<Category> path = categoryPaths.get(productCategories.getItems().getLast().getId());
+            if(path == null) {
+                LOG.warn("No category path found for Redbay category id: {}, productCategories: {}",
+                        productCategories.getItems().getLast().getId(), productCategories);
+                return List.of();
+            }
+            return path;
         }
     }
 
     private void mapRbCategoryTreeToBBCategoryPaths(
             List<Category> prefixPath,
-            ArrayOfCategories arrayOfCategories) {
+            RbArrayOfCategories arrayOfCategories) {
 
         arrayOfCategories.getItems().forEach(rbCategory -> {
             Category bbCategory = mapCategory(rbCategory);
@@ -47,7 +53,7 @@ public class CategoryMapper {
         });
     }
 
-    private Category mapCategory(pl.redbay.ws.client.types.Category rbCategory) {
+    private Category mapCategory(pl.redbay.ws.client.types.RbCategory rbCategory) {
         return Category.builder()
                 .sourceId(rbCategory.getId())
                 //TODO i18n
@@ -55,7 +61,7 @@ public class CategoryMapper {
                 .build();
     }
 
-    private TranslatedName translate(List<CategoryTranslation> rbCategoryTranslations) {
+    private TranslatedName translate(List<RbCategoryTranslation> rbCategoryTranslations) {
         TranslatedName bbTrans = new TranslatedName();
         rbCategoryTranslations.forEach(translations ->
                 bbTrans.add(translations.getLanguage().getIso(), translations.getValue())

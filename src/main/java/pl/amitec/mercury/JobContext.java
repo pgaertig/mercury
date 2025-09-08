@@ -21,4 +21,12 @@ public record JobContext(
         return tenant;
     }
 
+    public String getSource() {
+        var source = config.get("bitbee.source");
+        if(source == null) {
+            source = config.get("name");
+        }
+        return source;
+    }
+
 }

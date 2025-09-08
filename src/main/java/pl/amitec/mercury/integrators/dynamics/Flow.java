@@ -228,7 +228,7 @@ public class Flow {
                             .unitOfMeasure("PSC") //TODO fix when BB API returns the unit
                             //.unitOfMeasure(orderPosition.unit()) //FIXME
                             .unitPrice(orderPosition.price())
-                            .vatPercent(taxPercents.get(orderPosition.tax()))
+                            //.vatPercent(taxPercents.get(orderPosition.tax()))
                             .lineAmount(orderPosition.price().multiply(orderPosition.quantity()))
                             .build();
                     //TODO: this should be done in one request for the whole order

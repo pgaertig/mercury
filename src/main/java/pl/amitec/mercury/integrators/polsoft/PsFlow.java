@@ -35,6 +35,8 @@ public class PsFlow {
     }
 
     public void watch(PlanExecution planExecution) {
+        Config staticConfig = planExecution.loadConfig(Config.class);
+
         var source = PolsoftFtp.configure(config);
 
         if(Boolean.parseBoolean(config.getOrDefault("polsoft.orders.enabled", "true"))) {
@@ -102,13 +104,13 @@ public class PsFlow {
         try {
             bitbeeClient.session(() -> {
                 JobContext ctx = new JobContext(cache, bitbeeClient, config, new SyncStats());
+                new VariantSync().sync(ctx, state.getTransport(), "1",null);
+                new ClientSync().sync(ctx, state.getTransport(), "1", null);
                 if(Boolean.parseBoolean(config.getOrDefault("polsoft.invoices.enabled", "true"))) {
                     new InvoiceSync().sync(ctx, state.getTransport(), "1", null); //TODO dept
                 } else {
                     LOG.info("Skipping invoices processing (polsoft.invoices.enabled=false)");
                 }
-                new VariantSync().sync(ctx, state.getTransport(), "1",null);
-                new ClientSync().sync(ctx, state.getTransport(), "1", null);
             });
         } catch (Exception e) {
             LOG.error(

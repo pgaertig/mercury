@@ -8,6 +8,7 @@ public record Delivery(
         String name,
         BigDecimal tax,
         List<Payment> payments,
-        BigDecimal cost
+        BigDecimal cost,
+        String type
 ) {
 }

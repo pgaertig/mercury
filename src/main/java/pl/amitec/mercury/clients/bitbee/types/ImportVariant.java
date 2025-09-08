@@ -12,7 +12,7 @@ import java.util.Optional;
 @JsonInclude(Include.NON_ABSENT)
 @JsonPropertyOrder({"code", "product_code", "source", "source_id", "ean", "unit", "tax", "status", "lang",
         "debug", "producer", "name", "categories", "attrs", "stock"})
-@Builder
+@Builder(toBuilder = true)
 public record ImportVariant(
         String id,
         String productId,
@@ -28,6 +28,7 @@ public record ImportVariant(
         String debug,
         Producer producer,
         TranslatedName name,
+        TranslatedName description,
         List<List<Category>> categories,
         List<VariantAttr> attrs,
         List<Stock> stocks

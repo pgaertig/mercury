@@ -22,7 +22,6 @@ public class VariantSync {
     public Set<String> sync(JobContext jobContext,
                                 Transport deptDir, String dept, Set<String> selectedSourceIds) {
         var csvHelper = new CSVHelper();
-        String source = "polsoft";
 
         try(var stocksReader = deptDir.reader("stany.txt");
             var producersReader = deptDir.reader("produc.txt");
@@ -36,7 +35,7 @@ public class VariantSync {
             Warehouse warehouse = jobContext.bitbeeClient().getOrCreateWarehouse(
                     Warehouse.builder()
                             .name(STR."Magazyn \{ dept }")
-                            .source(source)
+                            .source(jobContext.getSource())
                             .sourceId(dept)
                             .availability(24)
                             .build()
@@ -62,22 +61,16 @@ public class VariantSync {
             Map<String, String> producers,
             Map<String, String> groups,
             String warehouseId, Map<String, String> stocks) {
+        var source = jobContext.getSource();
         var sourceId = product.get("towar_numer");
         if(selectedSourceIds != null && !selectedSourceIds.contains(product.get("towar_numer"))) {
             return Optional.empty();
         }
-        //stats.add(FAILED);
-        var code = product.get("towar_kod");
-        if(code == null || code.isEmpty()) {
-            //stats.add(FAILED);
-            LOG.warn("Product with no code {}", sourceId); //TODO row/lineno
-            return Optional.empty();
-        }
 
         var variant = ImportVariant.builder()
-                .code(code)
-                .productCode(code)
-                .source("polsoft") //TODO tenant
+                .code(sourceId)
+                .productCode(sourceId)
+                .source(jobContext.getSource())
                 .sourceId(sourceId)
                 .ean(product.get("towar_ean_sztuka"))
                 .unit(product.get("tw_jm"))
@@ -88,7 +81,7 @@ public class VariantSync {
                 .producer(
                         Optional.ofNullable(product.get("towar_producent")).flatMap(producerId ->
                                 Optional.ofNullable(producers.get(producerId)).map(producer ->
-                                        new Producer(producerId, producer, "polsoft")
+                                        new Producer(producerId, producer, source)
                                 )
                         ).orElse(null))
                 .name(TranslatedName.of("pl", product.get("towar_nazwa")))
@@ -99,15 +92,19 @@ public class VariantSync {
                         )
                 ))
                 .attrs(compactListOf(
-                        new VariantAttr("GRATIS", product.get("towar_gratis"), "pl"),
-                        new VariantAttr("ZBIORCZE", product.get("towar_ilosc_opak_zb"), "pl"),
+                        new VariantAttr("GRATIS", "GRATIS", product.get("towar_gratis"), "pl"),
+                        new VariantAttr("ZBIORCZE", "ZBIORCZE", product.get("towar_ilosc_opak_zb"), "pl"),
                         Optional.ofNullable(product.get("substancja_czynna")).map(value ->
-                                new VariantAttr("SUBSTANCJA CZYNNA", value, "pl")
-                        ).orElse(null)
+                                new VariantAttr("SUBSTANCJA CZYNNA", "SUBSTANCJA CZYNNA", value, "pl")
+                        ).orElse(null),
+                        Optional.ofNullable(product.get("towar_kod")).map(value ->
+                                new VariantAttr("KOD", "KOD", value, "pl")
+                        ).orElse(null),
+                        new VariantAttr("DATA WAŻNOŚCI", "DATA WAŻNOŚCI", product.get("najkrotsza_data"), "pl")
                 ))
                 .stocks(List.of(Stock.builder()
                                 .sourceId(String.format("%s:%s", dept, sourceId))
-                                .source("polsoft")
+                                .source(source)
                                 .warehouseId(warehouseId)
                                 .quantity(stocks.getOrDefault(sourceId, "0"))
                                 .price(product.get("towar_cena1")).build()))
@@ -127,7 +124,7 @@ public class VariantSync {
             return Optional.of(sourceId);
         } catch (Exception e) {
             jobContext.syncStats().incFailed();
-            LOG.error(String.format("Failed processing Variant: %s", code), e);
+            LOG.error(String.format("Failed processing Variant: %s", sourceId), e);
             return Optional.empty();
         }
     }

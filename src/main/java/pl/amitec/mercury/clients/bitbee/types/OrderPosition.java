@@ -1,6 +1,7 @@
 package pl.amitec.mercury.clients.bitbee.types;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.math.BigDecimal;
 
@@ -14,10 +15,17 @@ public record OrderPosition(
         String name,
         String code,
         BigDecimal price,
+        BigDecimal netto,
+        BigDecimal brutto,
+        BigDecimal totalNetto,
+        BigDecimal totalBrutto,
         BigDecimal quantity,
-        Long tax,
+        @JsonProperty("tax") Long taxId,
         String taxName,
-        Long warehouse,
+        @JsonProperty("unit") Long unitId,
+        String unitShortName,
+        @JsonProperty("warehouse") Long warehouseId,
+        String warehouseName,
         String comment
 ) {
 }

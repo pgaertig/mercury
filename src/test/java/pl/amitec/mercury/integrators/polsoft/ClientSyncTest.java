@@ -35,7 +35,8 @@ public class ClientSyncTest {
         jobContext = new JobContext(
                 hashCache, rbc,
                 Map.of(
-                        "tenant", "mm"
+                        "tenant", "mm",
+                        "bitbee.source", "polsoft"
                 ), new SyncStats()
         );
 
@@ -54,7 +55,7 @@ public class ClientSyncTest {
         new ClientSync().sync(jobContext, deptDir, "1", List.of("1"));
 
         verify(hashCache).hit(eq("mm"), eq("ps"), eq("c"), eq("1:1"), eq("""
-                {"source_id":"1","source":"polsoft","name":"PPHU mini-maxi hurt farm.","email":"1@test.pl","phone":"000000000","street":"RYCHLA 18","postcode":"41-948","city":"PIEKARY SL.","province":null,"nip":"6530003759","country":"PL","properties":{"iph_department":"1","iph_pricetype":"0","iph_discount":"0.00","iph_debt":"0.00","iph_sector":"F"},"stock_discounts":[{"source_id":"1:1","price":"3.90"},{"source_id":"1:2","price":"4.64"},{"source_id":"1:20","price":"7.93"},{"source_id":"1:21","price":"3.48"},{"source_id":"1:35","price":"5.70"}]}"""), any());
+                {"source_id":"1","source":"polsoft","name":"PPHU mini-maxi hurt farm.","email":"1@test.pl","phone":"000000000","street":"RYCHLA 18","postcode":"41-948","city":"PIEKARY SL.","province":null,"nip":"6530003759","country":"PL","properties":{"iph_department":"1","iph_pricetype":"0","iph_discount":"0.00","iph_debt":"0.00","iph_sector":"F","iph_logistic":null},"stock_discounts":[{"source_id":"1:1","price":"3.90"},{"source_id":"1:2","price":"4.64"},{"source_id":"1:20","price":"7.93"},{"source_id":"1:21","price":"3.48"},{"source_id":"1:35","price":"5.70"}]}"""), any());
     }
 
     @Test
@@ -62,6 +63,6 @@ public class ClientSyncTest {
         new ClientSync().sync(jobContext, deptDir, "1", List.of("48"));
 
         verify(hashCache).hit(eq("mm"), eq("ps"), eq("c"), eq("1:48"), eq("""
-                {"source_id":"48","source":"polsoft","name":"PHUP VIKI","email":"48@test.pl","phone":"000 000 00 00","street":"ROOSVELTA 54","postcode":"41-800","city":"ZABRZE","province":"śląskie","nip":"6310208979","country":"PL","properties":{"iph_department":"1","iph_pricetype":"0","iph_discount":"0.00","iph_debt":"0.00","iph_sector":"D"}}"""), any());
+                {"source_id":"48","source":"polsoft","name":"PHUP VIKI","email":"48@test.pl","phone":"000 000 00 00","street":"ROOSVELTA 54","postcode":"41-800","city":"ZABRZE","province":"śląskie","nip":"6310208979","country":"PL","properties":{"iph_department":"1","iph_pricetype":"0","iph_discount":"0.00","iph_debt":"0.00","iph_sector":"D","iph_logistic":null}}"""), any());
     }
 }

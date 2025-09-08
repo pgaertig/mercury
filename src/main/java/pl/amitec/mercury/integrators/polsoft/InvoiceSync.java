@@ -30,7 +30,6 @@ public class InvoiceSync {
     public Set<String> sync(JobContext jobContext,
                             Transport deptDir, String dept, Set<String> selectedSourceIds) {
         var csvHelper = new CSVHelper();
-        String source = "polsoft";
         var bitbeeClient = jobContext.bitbeeClient();
         var cache = jobContext.hashCache();
 
@@ -38,7 +37,7 @@ public class InvoiceSync {
             var psInvoices = csvHelper.streamCSV(invoiceReader);
             psInvoices.forEach((psInvoice) -> {
                 try {
-                    syncInvoice(jobContext, dept, psInvoice, cache, source, bitbeeClient);
+                    syncInvoice(jobContext, dept, psInvoice, cache, bitbeeClient);
                 } catch (Exception e) {
                     LOG.error("Failed to sync invoice", e);
                 }
@@ -49,8 +48,9 @@ public class InvoiceSync {
         return null;
     }
 
-    private void syncInvoice(JobContext jobContext, String dept, Map<String, String> psInvoice, Cache cache, String source, BitbeeClient bitbeeClient) {
+    private void syncInvoice(JobContext jobContext, String dept, Map<String, String> psInvoice, Cache cache, BitbeeClient bitbeeClient) {
         var sourceId = psInvoice.get("nr_fakt");
+        String source = jobContext.getSource();
         var deptSourceId = String.format("%s:%s", dept, sourceId);
         cache.hit(jobContext.getTenant(), source,"i", deptSourceId , psInvoice, inv -> {
             Optional<InvoiceListElement> existing = bitbeeClient.getInvoiceBySourceId(source, deptSourceId);

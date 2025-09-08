@@ -116,13 +116,13 @@ public class BitbeeClient {
                 .GET()
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        AuthTokenResponse tokenResponse = JSON_MAPPER.readValue(response.body(), AuthTokenResponse.class);
 
         if (response.statusCode() == 200) {
             LOG.debug("Authorization token body: {}", response.body());
+            AuthTokenResponse tokenResponse = JSON_MAPPER.readValue(response.body(), AuthTokenResponse.class);
             token = tokenResponse.token();
         } else {
-            throw new BitbeeClientException(STR. "Authorization failed (apikey=\{ apikey }, auth_id=\{ authId }, auth_pass=\{ authPass }): \{ response.body() }" );
+            throw new BitbeeClientException(STR."Authorization failed (apikey=\{ apikey }, auth_id=\{ authId }, auth_pass=\{ authPass }): \{ response.body() }" );
         }
     }
 
@@ -131,6 +131,7 @@ public class BitbeeClient {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(uri + "/users/login"))
                 .headers("Accept", "application/json",
+                        "Content-Type", "application/json",
                         "Api-Key", apikey,
                         "Authorization", "Bearer " + token)
                 .timeout(Duration.ofSeconds(10))
@@ -491,7 +492,7 @@ public class BitbeeClient {
         }
         return HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .timeout(Duration.ofSeconds(10))
+                .timeout(Duration.ofSeconds(20))
                 .headers("Accept", "application/json",
                         "Api-Key", apikey,
                         "Authorization", "Bearer " + token,

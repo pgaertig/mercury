@@ -45,12 +45,13 @@ public class PolsoftFtp {
     private final Boolean readonly;
 
     public static PolsoftFtp configure(Map<String, String> properties) {
+        var name = properties.get("name");
         return new PolsoftFtp(
             properties.getOrDefault("polsoft.ftp.host", "localhost"),
             Integer.parseInt(properties.getOrDefault("polsoft.ftp.port", "21")),
             properties.getOrDefault("polsoft.ftp.user", "anonymous"),
             properties.getOrDefault("polsoft.ftp.password", "anonymous"),
-            properties.getOrDefault("polsoft.ftp.cacheDir", "data/ftp"),
+            properties.getOrDefault("polsoft.ftp.cacheDir", STR."data/ftp/\{name}"),
             Boolean.parseBoolean(properties.getOrDefault("polsoft.ftp.readonly", "false")),
             Boolean.parseBoolean(properties.getOrDefault("polsoft.ftp.rerun-last", "false"))
         );
