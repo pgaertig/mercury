@@ -51,7 +51,7 @@ public class PolsoftFtp {
             Integer.parseInt(properties.getOrDefault("polsoft.ftp.port", "21")),
             properties.getOrDefault("polsoft.ftp.user", "anonymous"),
             properties.getOrDefault("polsoft.ftp.password", "anonymous"),
-            properties.getOrDefault("polsoft.ftp.cacheDir", STR."data/ftp/\{name}"),
+            properties.getOrDefault("polsoft.ftp.cacheDir", String.format("data/ftp/%s", name)),
             Boolean.parseBoolean(properties.getOrDefault("polsoft.ftp.readonly", "false")),
             Boolean.parseBoolean(properties.getOrDefault("polsoft.ftp.rerun-last", "false"))
         );

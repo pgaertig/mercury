@@ -329,13 +329,13 @@ public class RedbayToBitbeePlan implements MercuryPlanConfigurator {
     private TranslatedName getName(RbProduct product, String defaultLanguage) {
         return product.getTranslations().getItems().stream().filter(t -> "N".equals(t.getType())).findFirst().map(t ->
                 TranslatedName.of(t.getLanguage().getIso(), t.getValue())
-        ).orElse(TranslatedName.of(defaultLanguage, STR."\{product.getCode()} [brak nazwy w Redbay]"));
+        ).orElse(TranslatedName.of(defaultLanguage, String.format("%s [brak nazwy w Redbay]", product.getCode())));
     }
 
     private TranslatedName getDescription(RbProduct product, String defaultLanguage) {
         return product.getTranslations().getItems().stream().filter(t -> "D".equals(t.getType())).findFirst().map(t ->
                 TranslatedName.of(t.getLanguage().getIso(), t.getValue())
-        ).orElse(TranslatedName.of(defaultLanguage, STR."\{product.getCode()} [brak opisu w Redbay]"));
+        ).orElse(TranslatedName.of(defaultLanguage, String.format("%s [brak opisu w Redbay]", product.getCode())));
     }
 
     private String getLanguage(RbProduct product) {

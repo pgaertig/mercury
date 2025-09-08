@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.2</version>
+        <version>3.5.5</version>
     </parent>
 
     <properties>
@@ -105,7 +105,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
+            <version>1.18.40</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -215,13 +215,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
+                <version>3.14.0</version>
                 <configuration>
-                    <release>22</release>
-                    <enablePreview>true</enablePreview>
-                    <source>22</source>
-                    <target>22</target>
-                    <compilerArgs>--enable-preview</compilerArgs>
+                    <release>24</release>
+                    <!--enablePreview>true</enablePreview-->
+                    <source>24</source>
+                    <target>24</target>
+                    <!--compilerArgs>-/-enable-preview</compilerArgs-->
+                    <proc>full</proc>
                 </configuration>
             </plugin>
             <plugin>
@@ -229,7 +230,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.1.2</version>
                 <configuration>
-                    <argLine>--enable-preview</argLine>
+                    <!--argLine>-/-enable-preview</argLine-->
                 </configuration>
             </plugin>
             <plugin>
@@ -237,7 +238,7 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>3.1.2</version>
                 <configuration>
-                    <argLine>--enable-preview</argLine>
+                    <!--argLine>-/-enable-preview</argLine-->
                 </configuration>
             </plugin>
             <plugin>
@@ -258,7 +259,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.8.1</version>
                 <executions>
                     <execution>
                         <id>build-classpath</id>

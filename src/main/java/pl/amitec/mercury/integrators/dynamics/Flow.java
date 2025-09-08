@@ -63,7 +63,7 @@ public class Flow {
                 LOG.info("Sync variants");
                 String lang = "pl";
                 Warehouse warehouse = bitbeeClient.getOrCreateWarehouse(Warehouse.builder()
-                        .name(STR."Magazyn")
+                        .name("Magazyn")
                         .source(source)
                         .sourceId("1")
                         .availability(24)
@@ -209,7 +209,8 @@ public class Flow {
     private void syncOrder(JournalItem journalItem, String source, Map<Long, BigDecimal> taxPercents) {
         LOG.info("Sync order {}", journalItem.objectId());
         Order bbOrder = bitbeeClient.getOrder(journalItem.objectId())
-                .orElseThrow(() -> new RuntimeException(STR."Orphan Journal item has no Order: \{journalItem.objectId()}"));
+                .orElseThrow(() -> new RuntimeException(
+                        String.format("Orphan Journal item has no Order: %s", journalItem.objectId())));
         AtomicLong lineNo = new AtomicLong(1);
         bbOrder.positions().stream().forEach(orderPosition -> {
                     var salesOrder = SalesOrder.builder()
@@ -219,7 +220,7 @@ public class Flow {
                             .customerName(bbOrder.contact().company().fullname())
                             .externalDocumentNo("")
                             .documentDate(bbOrder.added().toLocalDate())
-                            .contact(STR."\{bbOrder.contact().forname()} \{bbOrder.contact().surname()}")
+                            .contact(String.format("%s %s", bbOrder.contact().forname(), bbOrder.contact().surname()))
                             .lineNo(lineNo.getAndIncrement())
                             .lineType("ITEM")
                             .no(orderPosition.code())

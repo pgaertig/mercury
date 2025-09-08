@@ -38,7 +38,7 @@ public class VariantSync {
 
             Warehouse warehouse = jobContext.bitbeeClient().getOrCreateWarehouse(
                     Warehouse.builder()
-                            .name(STR."Magazyn \{ dept }")
+                            .name(String.format("Magazyn %s", dept))
                             .source(jobContext.getSource())
                             .sourceId(dept)
                             .availability(24)
