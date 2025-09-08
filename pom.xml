@@ -217,10 +217,10 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.14.0</version>
                 <configuration>
-                    <release>24</release>
+                    <release>25</release>
                     <!--enablePreview>true</enablePreview-->
-                    <source>24</source>
-                    <target>24</target>
+                    <source>25</source>
+                    <target>25</target>
                     <!--compilerArgs>-/-enable-preview</compilerArgs-->
                     <proc>full</proc>
                 </configuration>
