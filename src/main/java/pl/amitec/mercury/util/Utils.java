@@ -10,7 +10,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 public class Utils {
 
@@ -103,5 +102,18 @@ public class Utils {
             arr.accept(node);
         }
         return node;
+    }
+
+    /**
+     * Makes consistent string representation of a map (sorted by keys)
+     * @param map
+     * @return
+     */
+    public static <K extends Comparable<? super K>> String mapToString(Map<K, ?> map) {
+        return map.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(e -> e.getKey() + "=" + e.getValue())
+                .reduce((e1, e2) -> e1 + ";" + e2)
+                .orElse("");
     }
 }

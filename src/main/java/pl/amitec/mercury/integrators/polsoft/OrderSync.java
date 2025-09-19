@@ -22,8 +22,7 @@ public class OrderSync {
     private static final Logger LOG = LoggerFactory.getLogger(OrderSync.class);
 
     private static final Pattern UNIQUE_NUMBER_PATTERN = Pattern.compile("^RB0*(\\d+)-0*(\\d+)$");
-    public void sync(JobContext ctx, Transport transport, String dept) {
-        Transport importDir = transport.subdir(String.format("IMPORT_ODDZ_%s", dept));
+    public void sync(JobContext ctx, Transport importDir, String dept) {
         LOG.info("Syncing orders for importDir={}", importDir);
         ArrayNode journalOrders = (ArrayNode) ctx.bitbeeClient().getOrdersJournalJson().path("list");
 

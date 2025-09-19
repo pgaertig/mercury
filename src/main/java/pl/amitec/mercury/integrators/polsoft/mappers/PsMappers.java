@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PsMappers {
+
+    public static final String SHORTEST_DATE_COL = "najkrotsza_data";
+
     public static PsStocks mapStocks(Reader inputFile) {
         try {
             CSVHelper csvHelper = new CSVHelper();
@@ -28,14 +31,14 @@ public class PsMappers {
                 PsStock stock = PsStock.builder()
                         .productId(record.get("towar_numer"))
                         .amount(record.get("towar_ilosc"))
-                        .shortestExpirationDate(record.get("najkrotsza_data"))
+                        .shortestExpirationDate(record.isSet(SHORTEST_DATE_COL) ? record.get(SHORTEST_DATE_COL) : null)
                         .build();
                 stockMap.put(stock.productId(), stock);
             });
 
             return PsStocks.builder()
                     .map(stockMap)
-                    .hasShortestExpirationDate(parser.getHeaderMap().containsKey("najkrotsza_data"))
+                    .hasShortestExpirationDate(parser.getHeaderMap().containsKey(SHORTEST_DATE_COL))
                     .build();
         } catch (IOException e) {
             throw new RuntimeException("Error parsing stocks CSV file", e);

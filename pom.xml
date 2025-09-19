@@ -218,10 +218,10 @@
                 <version>3.14.0</version>
                 <configuration>
                     <release>25</release>
-                    <!--enablePreview>true</enablePreview-->
+                    <enablePreview>true</enablePreview>
                     <source>25</source>
                     <target>25</target>
-                    <!--compilerArgs>-/-enable-preview</compilerArgs-->
+                    <compilerArgs>--enable-preview</compilerArgs>
                     <proc>full</proc>
                 </configuration>
             </plugin>
@@ -230,7 +230,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.1.2</version>
                 <configuration>
-                    <!--argLine>-/-enable-preview</argLine-->
+                    <argLine>--enable-preview</argLine>
                 </configuration>
             </plugin>
             <plugin>
@@ -238,7 +238,7 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>3.1.2</version>
                 <configuration>
-                    <!--argLine>-/-enable-preview</argLine-->
+                    <argLine>--enable-preview</argLine>
                 </configuration>
             </plugin>
             <plugin>

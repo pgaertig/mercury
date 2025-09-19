@@ -1,14 +1,15 @@
 package pl.amitec.mercury.integrators.polsoft;
 
-import lombok.Data;
+import lombok.Builder;
 
-@Data
-public class PolsoftFtpConfig {
-    private String host;
-    private int port;
-    private String user;
-    private String password;
-    private String cacheDir;
-    private boolean readonly;
-    private boolean rerunLast;
+@Builder
+record PolsoftFtpConfig(
+        String host,
+        int port,
+        String user,
+        String password,
+        String cacheDir,
+        boolean readonly,
+        boolean rerunLast
+) {
 }

@@ -99,14 +99,14 @@ public class VariantSync {
                 .attrs(compactListOf(
                         new VariantAttr("GRATIS", "GRATIS", product.get("towar_gratis"), "pl"),
                         new VariantAttr("ZBIORCZE", "ZBIORCZE", product.get("towar_ilosc_opak_zb"), "pl"),
-                        Optional.ofNullable(product.get("substancja_czynna")).map(value ->
-                                new VariantAttr("SUBSTANCJA CZYNNA", "SUBSTANCJA CZYNNA", value, "pl")
+                        Optional.ofNullable(product.get("substancja_czynna")).map(v ->
+                                new VariantAttr("SUBSTANCJA CZYNNA", "SUBSTANCJA CZYNNA", v, "pl")
                         ).orElse(null),
-                        Optional.ofNullable(product.get("towar_kod")).map(value ->
-                                new VariantAttr("KOD", "KOD", value, "pl")
+                        Optional.ofNullable(product.get("towar_kod")).map(v ->
+                                new VariantAttr("KOD", "KOD", v, "pl")
                         ).orElse(null),
-                        Optional.ofNullable(stock.shortestExpirationDate()).map(value ->
-                                new VariantAttr("DATA WAŻNOŚCI", "DATA WAŻNOŚCI", value, "pl")
+                        Optional.ofNullable(stock.shortestExpirationDate()).map(v ->
+                                new VariantAttr("DATA WAŻNOŚCI", "DATA WAŻNOŚCI", v, "pl")
                         ).orElse(null)
                 ))
                 .stocks(List.of(Stock.builder()

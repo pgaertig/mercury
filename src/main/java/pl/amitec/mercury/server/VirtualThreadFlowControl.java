@@ -40,6 +40,8 @@ public class VirtualThreadFlowControl implements FlowControl {
             MDC.put("plan", finalPlan);
             MDC.put("plan-log", finalPlanLog);
             LOG.info("Logging plan {} to {}", finalName, finalPlanLog);
+            // TODO switch to scoped value
+            // ScopedValue.where(ScopedValues.PLAN_SCOPE, new PlanScopeValue(finalPlan, finalPlanLog)).run(runnable);
             runnable.run();
         });
     }

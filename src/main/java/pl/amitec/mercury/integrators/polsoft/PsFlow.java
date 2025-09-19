@@ -40,11 +40,15 @@ public class PsFlow {
         var source = PolsoftFtp.configure(config);
 
         if(Boolean.parseBoolean(config.getOrDefault("polsoft.orders.enabled", "true"))) {
+            String localDir = String.format("data/%s/IMPORT_ODDZ_%s", staticConfig.name, staticConfig.polsoft.department);
+            String localDirDone = String.format("data/%s/IMPORT_ODDZ_%s-sent", staticConfig.name, staticConfig.polsoft.department);
+            String remoteDir = String.format("/IMPORT_ODDZ_%s", staticConfig.polsoft.department);
+
             planExecution.getTaskExecutor().execute("orders", () -> {
                 while(true) {
-                    processOrders();
+                    processOrders(localDir);
                     try {
-                        source.syncDirToRemote("data/IMPORT_ODDZ_1", "data/IMPORT_ODDZ_1-sent", "/IMPORT_ODDZ_1");
+                        source.syncDirToRemote(localDir, localDirDone, remoteDir);
                     } catch (Exception e) {
                         LOG.error(
                                 String.format("Failed to sync dir to remote for %s", source), e);
@@ -87,10 +91,10 @@ public class PsFlow {
         });
     }
 
-    private void processOrders() {
+    private void processOrders(String localDir) {
         JobContext ctx = new JobContext(cache,
                 bitbeeClient, config, new SyncStats());
-        var writeTransport = FilesystemTransport.configure(config, false, Charsets.ISO_8859_2);
+        var writeTransport = FilesystemTransport.configure(localDir, false, Charsets.ISO_8859_2.name());
         try {
             bitbeeClient.session(() -> {
                 new OrderSync().sync(ctx, writeTransport, config.get("polsoft.department"));

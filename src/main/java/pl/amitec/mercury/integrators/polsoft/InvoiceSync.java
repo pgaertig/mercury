@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static pl.amitec.mercury.util.Utils.mapToString;
+
 public class InvoiceSync {
 
     private static final Logger LOG = LoggerFactory.getLogger(InvoiceSync.class);
@@ -52,7 +54,8 @@ public class InvoiceSync {
         var sourceId = psInvoice.get("nr_fakt");
         String source = jobContext.getSource();
         var deptSourceId = String.format("%s:%s", dept, sourceId);
-        cache.hit(jobContext.getTenant(), source,"i", deptSourceId , psInvoice, inv -> {
+
+        cache.hit(jobContext.getTenant(), source,"i", deptSourceId , mapToString(psInvoice), inv -> {
             Optional<InvoiceListElement> existing = bitbeeClient.getInvoiceBySourceId(source, deptSourceId);
             var psCompanyId = psInvoice.get("kt_numer_platnik");
             var bbInvoice = Invoice.builder()

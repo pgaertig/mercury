@@ -14,6 +14,8 @@ PLATFORMS
   universal-java-21
   universal-java-22
   universal-java-23
+  universal-java-24
+  universal-java-25
 
 DEPENDENCIES
   pry
