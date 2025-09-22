@@ -3,11 +3,12 @@ package pl.amitec.mercury.integrators.polsoft;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.amitec.mercury.JobContext;
+import pl.amitec.mercury.MercuryException;
 import pl.amitec.mercury.clients.bitbee.BitbeeClient;
 import pl.amitec.mercury.clients.bitbee.types.ImportClient;
 import pl.amitec.mercury.clients.bitbee.types.StockDiscount;
 import pl.amitec.mercury.dict.PostCodes;
+import pl.amitec.mercury.engine.JobContext;
 import pl.amitec.mercury.transport.Transport;
 
 import java.util.List;
@@ -107,8 +108,7 @@ public class ClientSync implements PsCommonSync {
             }
         } catch (JsonProcessingException e) {
             jobContext.syncStats().incFailed();
-            LOG.error(String.format("Failed processing Client: %s", id), e);
-            throw new RuntimeException(e);
+            throw new MercuryException(String.format("Failed processing Client: %s", id), e);
         }
         return true;
     }

@@ -9,6 +9,7 @@ import pl.amitec.mercury.transport.FilesystemTransport;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -203,7 +204,7 @@ public class PolsoftFtp {
             }
             return Optional.of(state);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         } finally {
             try {
                 ftp.disconnect();

@@ -1,14 +1,11 @@
 package pl.amitec.mercury.util;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.UncheckedIOException;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 public class ZipUtil {
@@ -25,7 +22,7 @@ public class ZipUtil {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 }

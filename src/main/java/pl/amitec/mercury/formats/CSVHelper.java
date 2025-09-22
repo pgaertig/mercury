@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.UncheckedIOException;
 import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -102,7 +103,7 @@ public class CSVHelper {
                     )
             );
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
 
     }

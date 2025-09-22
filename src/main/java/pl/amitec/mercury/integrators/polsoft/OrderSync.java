@@ -6,8 +6,8 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.amitec.mercury.JobContext;
 import pl.amitec.mercury.MercuryException;
+import pl.amitec.mercury.engine.JobContext;
 import pl.amitec.mercury.transport.Transport;
 
 import java.io.IOException;
@@ -28,7 +28,7 @@ public class OrderSync {
         ArrayNode journalOrders = (ArrayNode) ctx.bitbeeClient().getOrdersJournalJson().path("list");
 
         if(!journalOrders.isArray()) {
-            throw new RuntimeException("Orders is not array");
+            throw new MercuryException("Orders is not array");
         }
         if(journalOrders.isEmpty()) {
             LOG.info("No orders");
@@ -82,7 +82,7 @@ public class OrderSync {
                     order.get("comment").asText().replaceAll("[\n\r\t]", " ")
             );
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new MercuryException("Order write IO error", e);
         }
 
         Set<String> sources = new HashSet<>();

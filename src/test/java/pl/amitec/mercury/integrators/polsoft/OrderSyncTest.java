@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pl.amitec.mercury.JobContext;
 import pl.amitec.mercury.SyncStats;
 import pl.amitec.mercury.clients.bitbee.BitbeeClient;
+import pl.amitec.mercury.engine.JobContext;
 import pl.amitec.mercury.persistence.HashCache;
 import pl.amitec.mercury.transport.Transport;
 

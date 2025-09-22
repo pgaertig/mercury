@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import pl.amitec.mercury.MercuryException;
 import pl.amitec.mercury.Plan;
 
 import java.io.IOException;
@@ -75,7 +76,7 @@ public class PlanLoader {
                         properties.putIfAbsent("name", fileNameWithoutExtension);
                         propertiesMap.put(relativePath.toString(), propertiesToMap(properties));
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        throw new MercuryException("Plan loading exception: " + entry, e);
                     }
                 }
             }

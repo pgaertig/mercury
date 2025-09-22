@@ -18,7 +18,7 @@ public class Utils {
         try {
             sha1 = MessageDigest.getInstance("SHA-1");
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            throw new Error(e);
         }
         byte[] hash = sha1.digest(input.getBytes());
         return bytesToHex(hash);

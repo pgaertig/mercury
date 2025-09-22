@@ -1,6 +1,5 @@
 package pl.amitec.mercury.net;
 
-import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -75,7 +74,7 @@ public class FTPHelper {
         try {
             input = new DigestInputStream(ftp.retrieveFileStream(remotePath), MessageDigest.getInstance("SHA-1"));
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            throw new Error(e);
         }
         output  = new FileOutputStream(localPath);
         if(!FTPReply.isPositivePreliminary(ftp.getReplyCode())) {

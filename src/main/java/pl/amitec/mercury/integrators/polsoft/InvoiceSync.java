@@ -2,10 +2,11 @@ package pl.amitec.mercury.integrators.polsoft;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.amitec.mercury.JobContext;
+import pl.amitec.mercury.MercuryException;
 import pl.amitec.mercury.clients.bitbee.BitbeeClient;
 import pl.amitec.mercury.clients.bitbee.types.Invoice;
 import pl.amitec.mercury.clients.bitbee.types.InvoiceListElement;
+import pl.amitec.mercury.engine.JobContext;
 import pl.amitec.mercury.formats.CSVHelper;
 import pl.amitec.mercury.persistence.Cache;
 import pl.amitec.mercury.transport.Transport;
@@ -45,7 +46,7 @@ public class InvoiceSync {
                 }
             });
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new MercuryException("Invoice parsing error", e);
         }
         return null;
     }

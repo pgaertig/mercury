@@ -1,6 +1,7 @@
-package pl.amitec.mercury;
+package pl.amitec.mercury.engine;
 
 import lombok.Builder;
+import pl.amitec.mercury.SyncStats;
 import pl.amitec.mercury.clients.bitbee.BitbeeClient;
 import pl.amitec.mercury.persistence.Cache;
 

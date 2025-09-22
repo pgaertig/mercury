@@ -1,9 +1,9 @@
 package pl.amitec.mercury.dict;
 
 import org.apache.commons.csv.CSVFormat;
+import pl.amitec.mercury.MercuryException;
 import pl.amitec.mercury.util.ZipUtil;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -36,7 +36,7 @@ public class PostCodes {
                         }
                         );
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        throw new MercuryException("Post code parsing error", e);
                     }
                 });
     }

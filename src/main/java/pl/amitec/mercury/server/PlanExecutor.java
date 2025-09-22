@@ -42,7 +42,7 @@ public class PlanExecutor {
 
         flowControl.run(plan.name(), () -> {
             Class<? extends Integrator> integratorClass = integratorDiscovery.getIntegrator(plan.integrator()).orElseThrow(
-                    () -> new RuntimeException("Integrator not found: " + plan.integrator())
+                    () -> new MercuryException("Integrator not found: " + plan.integrator())
             );
             try {
                 Integrator integrator = integratorClass.getConstructor().newInstance();
@@ -53,7 +53,7 @@ public class PlanExecutor {
                     LOG.warn("Plan {} failed test", plan.name());
                 }
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new MercuryException("Plan failure, no further processing.", e);
             }
         });
         return planExecution;

@@ -3,8 +3,8 @@ package pl.amitec.mercury.persistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.sqlite.SQLiteDataSource;
+import pl.amitec.mercury.MercuryException;
 import pl.amitec.mercury.util.Utils;
 
 import java.nio.file.Paths;
@@ -96,7 +96,7 @@ public class HashCache implements Cache {
         try {
             jdbcTemplate.getDataSource().getConnection().close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new MercuryException("DB closing problem", e);
         }
     }
 

@@ -18,6 +18,7 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
+import pl.amitec.mercury.MercuryException;
 import pl.amitec.mercury.Plan;
 
 import java.util.List;
@@ -64,7 +65,7 @@ public class MercuryApp implements ApplicationListener<ContextRefreshedEvent> {
                     LOG.info("Starting plan: {}", plan.name());
                     planExecutor.execute(plan);
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    throw new MercuryException("Plan execution failed: " + plan, e);
                 }
             } else {
                 LOG.info("Skipping plan {} as it is disabled", plan.name());

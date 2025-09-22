@@ -8,4 +8,8 @@ public class MercuryException extends RuntimeException {
     public MercuryException(String str) {
         super(str);
     }
+
+    public MercuryException(Exception e) {
+        super("Generic exception", e);
+    }
 }

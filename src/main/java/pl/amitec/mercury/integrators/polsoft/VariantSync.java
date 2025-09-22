@@ -2,9 +2,10 @@ package pl.amitec.mercury.integrators.polsoft;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.amitec.mercury.JobContext;
+import pl.amitec.mercury.MercuryException;
 import pl.amitec.mercury.clients.bitbee.BitbeeClient;
 import pl.amitec.mercury.clients.bitbee.types.*;
+import pl.amitec.mercury.engine.JobContext;
 import pl.amitec.mercury.formats.CSVHelper;
 import pl.amitec.mercury.integrators.polsoft.mappers.PsMappers;
 import pl.amitec.mercury.integrators.polsoft.model.PsStock;
@@ -55,7 +56,7 @@ public class VariantSync {
 
             return variantSourceIds;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new MercuryException("Variant sync IO exception", e);
         }
     }
 

@@ -405,10 +405,10 @@ public class BitbeeClient {
                 LOG.debug("+Bitbee: POST " + url + " success " + response.statusCode() + ": " + response.body());
                 return response.body();
             } else {
-                throw new RuntimeException("!Bitbee: POST " + url + " failure, req: " + json + "\n resp: " + response.statusCode() + ": " + response.body());
+                throw new BitbeeClientException("!Bitbee: POST " + url + " failure, req: " + json + "\n resp: " + response.statusCode() + ": " + response.body());
             }
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new BitbeeClientException(e);
         }
 
     }
@@ -428,10 +428,10 @@ public class BitbeeClient {
                 LOG.debug("+Bitbee: PUT " + url + " success " + response.statusCode() + ": " + response.body());
                 return response.body();
             } else {
-                throw new RuntimeException("!Bitbee: POST " + url + " failure " + response.statusCode() + ": " + response.body());
+                throw new BitbeeClientException("!Bitbee: POST " + url + " failure " + response.statusCode() + ": " + response.body());
             }
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new BitbeeClientException(e);
         }
     }
 
@@ -444,7 +444,7 @@ public class BitbeeClient {
         try {
             return JSON_MAPPER.readTree(getJsonString(apiCall, params));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new BitbeeClientException(e);
         }
     }
 
@@ -471,9 +471,9 @@ public class BitbeeClient {
         try {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new BitbeeClientException(e);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new BitbeeClientException(e);
         }
 
         if (response.statusCode() == 200) {
@@ -481,7 +481,7 @@ public class BitbeeClient {
             return response.body();
         } else {
             LOG.debug("+Bitbee: GET " + url + " success " + response.statusCode() + ": " + response.body());
-            throw new RuntimeException("!Bitbee: GET " + url + " failure " + response.statusCode() + ": " + response.body());
+            throw new BitbeeClientException("!Bitbee: GET " + url + " failure " + response.statusCode() + ": " + response.body());
         }
     }
 
@@ -490,7 +490,7 @@ public class BitbeeClient {
             try {
                 session(()->{});
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new BitbeeClientException(e);
             }
         }
         return HttpRequest.newBuilder()
