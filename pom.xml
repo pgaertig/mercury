@@ -24,12 +24,6 @@
     </properties>
 
     <dependencies>
-        <!-- local -->
-        <dependency>
-            <groupId>pl.redbay</groupId>
-            <artifactId>redbay-ws-client</artifactId>
-            <version>1.1.0</version>
-        </dependency>
 
         <!-- run `mvn versions:display-dependency-updates` to check for updates -->
 
