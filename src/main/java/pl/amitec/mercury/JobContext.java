@@ -1,11 +1,13 @@
 package pl.amitec.mercury;
 
+import lombok.Builder;
 import pl.amitec.mercury.clients.bitbee.BitbeeClient;
 import pl.amitec.mercury.persistence.Cache;
 
 import java.util.Map;
 import java.util.Objects;
 
+@Builder
 public record JobContext(
         Cache hashCache,
         BitbeeClient bitbeeClient,

@@ -7,6 +7,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.amitec.mercury.JobContext;
+import pl.amitec.mercury.MercuryException;
 import pl.amitec.mercury.transport.Transport;
 
 import java.io.IOException;
@@ -103,7 +104,7 @@ public class OrderSync {
                 sources.add(position.get("variantSource").asText());
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new MercuryException("Error during write of order positons", e);
         }
 
         if (sources.contains(source)) {

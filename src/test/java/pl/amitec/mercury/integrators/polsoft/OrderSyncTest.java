@@ -30,7 +30,7 @@ class OrderSyncTest {
     @Mock
     BitbeeClient rbc;
     @Mock
-    Transport deptDir;
+    Transport importDir;
 
     JobContext jobContext;
 
@@ -39,11 +39,12 @@ class OrderSyncTest {
         jobContext = new JobContext(
                 hashCache, rbc,
                 Map.of(
-                        "tenant", "mm"
+                        "tenant", "mm",
+                        "bitbee.source", "polsoft"
                 ), new SyncStats()
         );
 
-        when(deptDir.subdir(eq("IMPORT_ODDZ_1"))).thenReturn(deptDir);
+        //when(importDir.subdir(eq("IMPORT_ODDZ_1"))).thenReturn(importDir);
 
         //TODO use typed records
         when(rbc.getOrdersJournalJson()).thenReturn(new ObjectMapper().readTree(new StringReader("""
@@ -57,17 +58,16 @@ class OrderSyncTest {
 
     @Test
     public void test() throws IOException {
-        new OrderSync().sync(jobContext, deptDir, "1");
-        when(deptDir.subdir("IMPORT_ODDZ_1")).thenReturn(deptDir);
+        new OrderSync().sync(jobContext, importDir, "1");
+        //when(importDir.subdir("IMPORT_ODDZ_1")).thenReturn(importDir);
 
         verify(rbc).confirmJournalItem(eq("59"));
-        verify(deptDir).subdir("IMPORT_ODDZ_1");
 
-        verify(deptDir).write(matches("^N[0-9]+\\.146\\.txt$"), eq("""
+        verify(importDir).write(matches("^N[0-9]+\\.146\\.txt$"), eq("""
                 nrfak\trodzdok\tnrodb\tidhandl\tdatasp\tuwagi
                 S3-146\tZA\t9103\t0\t2023-08-28 11:08:59\tproszę o telefon nr 123
                 """));
-        verify(deptDir).write(matches("^P[0-9]+\\.146\\.txt"), eq("""
+        verify(importDir).write(matches("^P[0-9]+\\.146\\.txt"), eq("""
                 nrfak\trodzdok\tnrtow\tvat\tilosc\tcenan\tuwagi_do_lini\tzestaw
                 S3-146\tZA\t52152\t0\t1\t47.7\t\t0
                 S3-146\tZA\t52157\t0\t2\t47.7\t\t0
@@ -76,7 +76,7 @@ class OrderSyncTest {
                 S3-146\tZA\t54512\t0\t1\t52\tzielony\t0
                 """));
 
-        verify(deptDir).write(matches("^f[0-9]+\\.146\\.txt"), eq(""));
+        verify(importDir).write(matches("^f[0-9]+\\.146\\.txt"), eq(""));
 
     }
 

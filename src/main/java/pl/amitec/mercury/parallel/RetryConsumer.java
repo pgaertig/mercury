@@ -1,5 +1,7 @@
 package pl.amitec.mercury.parallel;
 
+import pl.amitec.mercury.MercuryException;
+
 import java.util.function.Consumer;
 
 public class RetryConsumer {
@@ -8,7 +10,7 @@ public class RetryConsumer {
             try {
                 ExponentialBackoff.run(maxRetries, initialDelaySec, () -> consumer.accept(item));
             } catch (Exception e) {
-                throw new RuntimeException("Task failed after max retries", e);
+                throw new MercuryException("Task failed after max retries", e);
             }
         };
     }

@@ -1,7 +1,6 @@
 package pl.amitec.mercury.integrators.polsoft;
 
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
 
 @Data
 public class PolsoftConfig {
@@ -9,9 +8,9 @@ public class PolsoftConfig {
     String department;
     PolsoftProductsConfig products;
 
-    @Value("${polsoft.orders.enabled}")
+    //@Value("${polsoft.orders.enabled}")
     boolean ordersEnabled;
 
-    @Value("${polsoft.invoices.enabled}")
+    //@Value("${polsoft.invoices.enabled}")
     boolean invoicesEnabled;
 }

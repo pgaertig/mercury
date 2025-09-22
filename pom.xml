@@ -11,15 +11,16 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.5</version>
+        <version>3.5.6</version>
     </parent>
 
     <properties>
         <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
         <propane.basedir>${project.basedir}</propane.basedir>
         <source.directory>src</source.directory>
-        <junit.jupiter.version>5.9.0</junit.jupiter.version>
-        <junit.platform.version>1.9.0</junit.platform.version>
+        <junit.jupiter.version>5.13.4</junit.jupiter.version>
+        <junit.platform.version>1.13.4</junit.platform.version>
+        <feign.version>13.6</feign.version>
     </properties>
 
     <dependencies>
@@ -30,46 +31,54 @@
             <version>1.1.0</version>
         </dependency>
 
+        <!-- run `mvn versions:display-dependency-updates` to check for updates -->
+
         <!-- remote -->
         <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
-            <version>3.9.0</version>
+            <version>3.12.0</version>
         </dependency>
         <dependency>
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-core</artifactId>
-            <version>13.1</version>
+            <version>${feign.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-jackson</artifactId>
-            <version>13.1</version>
+            <version>${feign.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-jaxrs2</artifactId>
-            <version>13.1</version>
+            <version>${feign.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-slf4j</artifactId>
-            <version>13.1</version>
+            <version>${feign.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-java11</artifactId>
-            <version>13.1</version>
+            <version>${feign.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
-            <version>1.10.0</version>
+            <version>1.14.1</version>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>
-            <version>2.2</version>
+            <version>3.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -92,20 +101,26 @@
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-suite</artifactId>
+            <artifactId>junit-platform-commons</artifactId>
+            <version>${junit.platform.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-engine</artifactId>
             <version>${junit.platform.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.4.0</version>
+            <version>5.19.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.40</version>
+            <version>1.18.42</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -158,21 +173,21 @@
         </dependency>
         <dependency>
             <groupId>org.wiremock</groupId>
-            <artifactId>wiremock</artifactId>
-            <version>3.2.0</version>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>3.13.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.tngtech.archunit</groupId>
             <artifactId>archunit-junit5</artifactId>
-            <version>1.2.1</version>
+            <version>1.4.1</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.42.0.0</version>
+            <version>3.50.3.0</version>
         </dependency>
 
         <!-- front-end -->
@@ -183,22 +198,22 @@
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>bootstrap</artifactId>
-            <version>5.3.0</version>
+            <version>5.3.8</version>
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>webjars-locator-core</artifactId>
-            <version>0.53</version>
+            <version>0.59</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.npm</groupId>
             <artifactId>hotwired__turbo</artifactId>
-            <version>7.3.0</version>
+            <version>8.0.13</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.npm</groupId>
             <artifactId>hotwired__stimulus</artifactId>
-            <version>3.2.1</version>
+            <version>3.2.2</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -228,7 +243,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>3.5.4</version>
                 <configuration>
                     <argLine>--enable-preview</argLine>
                 </configuration>

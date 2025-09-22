@@ -3,6 +3,7 @@ package pl.amitec.mercury.integrators.dynamics;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.amitec.mercury.MercuryException;
 import pl.amitec.mercury.PlanExecution;
 import pl.amitec.mercury.clients.bitbee.BitbeeClient;
 import pl.amitec.mercury.clients.bitbee.types.*;
@@ -80,7 +81,7 @@ public class Flow {
                 Function<String, Company> companyLookup = (String sourceId) -> companyCache.computeIfAbsent(sourceId, (id) -> {
                     var company = bitbeeClient.getCompanyBySourceId(source, id);
                     if (company.isEmpty()) {
-                        throw new RuntimeException("Company not found source=" + id);
+                        throw new MercuryException("Company not found source=" + id);
                     }
                     return company.get();
                 });

@@ -2,6 +2,7 @@ package pl.amitec.mercury.integrators.polsoft.mappers;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import pl.amitec.mercury.MercuryException;
 import pl.amitec.mercury.formats.CSVHelper;
 import pl.amitec.mercury.integrators.polsoft.model.PsStock;
 import pl.amitec.mercury.integrators.polsoft.model.PsStocks;
@@ -41,7 +42,7 @@ public class PsMappers {
                     .hasShortestExpirationDate(parser.getHeaderMap().containsKey(SHORTEST_DATE_COL))
                     .build();
         } catch (IOException e) {
-            throw new RuntimeException("Error parsing stocks CSV file", e);
+            throw new MercuryException("Error parsing stocks CSV file", e);
         }
     }
 }

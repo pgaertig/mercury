@@ -49,6 +49,7 @@
             <fileNamePattern>
                 log/mercury-error.%d{yyyy-MM-dd}.log.gz
             </fileNamePattern>
+            <maxHistory>14</maxHistory>
         </rollingPolicy>
 
     </appender>

@@ -39,7 +39,8 @@ public class VariantSyncTest {
         jobContext = new JobContext(
                 hashCache, rbc,
                 Map.of(
-                        "tenant", "mm"
+                        "tenant", "mm",
+                        "bitbee.source", "polsoft"
                 ),
                 new SyncStats()
         );
@@ -66,7 +67,7 @@ public class VariantSyncTest {
         new VariantSync().sync(jobContext, deptDir, "1", Set.of("1"));
 
         verify(hashCache).hit(eq("mm"), eq("ps"), eq("p"), eq("1:1"), eq("""
-                {"code":"2/413","product_code":"2/413","source":"polsoft","source_id":"1","ean":"5903407024134","unit":"KPL","tax":"23%","lang":"pl","producer":{"source_id":"13","name":"CAN -PRODUKTY FIRMY CANPOL BABIES","source":"polsoft"},"name":{"pl":"SZCZ.DO BUT.2/413 I SMOCZKÓW"},"categories":[[{"source_id":"48","name":{"pl":"SZCZOTKI DO BUTELEK"}}]],"attrs":[{"name":"GRATIS","value":"0","lang":"pl"},{"name":"ZBIORCZE","value":"1","lang":"pl"}],"stocks":[{"source_id":"1:1","source":"polsoft","warehouse_id":"3","quantity":"42","price":"3.90"}]}"""), any());
+                {"code":"1","product_code":"1","source":"polsoft","source_id":"1","ean":"5903407024134","unit":"KPL","tax":"23%","lang":"pl","producer":{"source_id":"13","name":"CAN -PRODUKTY FIRMY CANPOL BABIES","source":"polsoft"},"name":{"pl":"SZCZ.DO BUT.2/413 I SMOCZKÓW"},"categories":[[{"source_id":"48","name":{"pl":"SZCZOTKI DO BUTELEK"}}]],"attrs":[{"code":"GRATIS","name":"GRATIS","value":"0","lang":"pl"},{"code":"ZBIORCZE","name":"ZBIORCZE","value":"1","lang":"pl"},{"code":"KOD","name":"KOD","value":"2/413","lang":"pl"}],"stocks":[{"source_id":"1:1","source":"polsoft","warehouse_id":"3","quantity":"42","price":"3.90","retail_price":null}]}"""), any());
     }
 
     @Test
@@ -78,7 +79,7 @@ public class VariantSyncTest {
         new VariantSync().sync(jobContext, deptDir, "1", Set.of("1"));
 
         verify(hashCache).hit(eq("mm"), eq("ps"), eq("p"), eq("1:1"), eq("""
-                {"code":"2/413","product_code":"2/413","source":"polsoft","source_id":"1","ean":"5903407024134","unit":"KPL","tax":"23%","lang":"pl","producer":{"source_id":"13","name":"CAN -PRODUKTY FIRMY CANPOL BABIES","source":"polsoft"},"name":{"pl":"SZCZ.DO BUT.2/413 I SMOCZKÓW"},"categories":[[{"source_id":"48","name":{"pl":"SZCZOTKI DO BUTELEK"}}]],"attrs":[{"name":"GRATIS","value":"0","lang":"pl"},{"name":"ZBIORCZE","value":"1","lang":"pl"}],"stocks":[{"source_id":"1:1","source":"polsoft","warehouse_id":"3","quantity":"42","price":"3.90"}]}"""), any());
+                {"code":"1","product_code":"1","source":"polsoft","source_id":"1","ean":"5903407024134","unit":"KPL","tax":"23%","lang":"pl","producer":{"source_id":"13","name":"CAN -PRODUKTY FIRMY CANPOL BABIES","source":"polsoft"},"name":{"pl":"SZCZ.DO BUT.2/413 I SMOCZKÓW"},"categories":[[{"source_id":"48","name":{"pl":"SZCZOTKI DO BUTELEK"}}]],"attrs":[{"code":"GRATIS","name":"GRATIS","value":"0","lang":"pl"},{"code":"ZBIORCZE","name":"ZBIORCZE","value":"1","lang":"pl"},{"code":"KOD","name":"KOD","value":"2/413","lang":"pl"}],"stocks":[{"source_id":"1:1","source":"polsoft","warehouse_id":"3","quantity":"42","price":"3.90","retail_price":null}]}"""), any());
     }
 
 }

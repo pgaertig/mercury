@@ -3,6 +3,7 @@ package pl.amitec.mercury.integrators.polsoft;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.amitec.mercury.JobContext;
+import pl.amitec.mercury.MercuryException;
 import pl.amitec.mercury.PlanExecution;
 import pl.amitec.mercury.SyncStats;
 import pl.amitec.mercury.clients.bitbee.BitbeeClient;
@@ -56,7 +57,7 @@ public class PsFlow {
                     try {
                         Thread.sleep(Duration.ofMinutes(1));
                     } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
+                        throw new MercuryException("Orders loop interrupted", ex);
                     }
                 }
             });
@@ -83,7 +84,7 @@ public class PsFlow {
                     try {
                         Thread.sleep(Duration.ofMinutes(5));
                     } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
+                        throw new MercuryException("Sync look interrupted", ex);
                     }
                 }
 
