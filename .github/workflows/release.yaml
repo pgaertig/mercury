@@ -1,0 +1,77 @@
+name: Maven Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      releaseVersion:
+        description: 'Release version'
+        required: true
+      developmentVersion:
+        description: 'Next development version (without -SNAPSHOT)'
+        required: true
+
+run-name: "Maven Release v${{ github.event.inputs.releaseVersion }} (dev: ${{ github.event.inputs.developmentVersion }}-SNAPSHOT)"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: '25'
+          cache: maven
+      - name: Configure Git user
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions in behalf of ${{ github.triggering_actor }}"
+
+
+      - name: Prepare Release
+        run: |
+          set -e
+          mvn -B  release:prepare --no-transfer-progress \
+          -DreleaseVersion=${{ github.event.inputs.releaseVersion }} \
+          -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}-SNAPSHOT \
+          -DtagNameFormat=v@{project.version}
+#      - name: Generate Changelog
+#        run: mvn -B git-changelog-maven-plugin:git-changelog --no-transfer-progress
+#      - name: Commit Changelog
+#        run: |
+#          git add CHANGELOG.md
+#          git commit -m "docs: update changelog for version ${{ github.event.inputs.releaseVersion }}"
+#          git push origin master
+
+      - name: Perform Release
+        run: mvn -B release:perform --no-transfer-progress
+      - name: Push changes
+        run: |
+         set -e
+         git push origin master
+         git push origin --tags
+      - name: Get Changelog Entry
+        id: changelog
+        run: |
+          CHANGELOG_ENTRY=$(sed -n "/## ${GITHUB_REF#refs/tags/}/,/## /p" CHANGELOG.md | sed '$d')
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG_ENTRY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ github.event.inputs.releaseVersion }}
+          name: Release v${{ github.event.inputs.releaseVersion }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          files: |
+            target/*.jar
+            target/*.pom
+          draft: true
+          prerelease: false

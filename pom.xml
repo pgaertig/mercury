@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>pl.amitec</groupId>
     <artifactId>mercury</artifactId>
-    <version>1.0.0</version>
+    <version>1.2.0-SNAPSHOT</version>
     <name>mercury</name>
     <packaging>jar</packaging>
 
@@ -214,6 +213,12 @@
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
     </dependencies>
+
+    <scm>
+        <developerConnection>scm:git:https://github.com/pgaertig/mercury.git</developerConnection>
+        <tag>v1.1.1</tag>
+    </scm>
+
     <build>
         <defaultGoal>install</defaultGoal>
         <plugins>
@@ -278,6 +283,59 @@
                         </goals>
                         <configuration>
                             <outputFile>${project.build.directory}/dev-classpath.txt</outputFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>3.0.1</version>
+                <configuration>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
+                    <checkModificationExcludes>
+                        <checkModificationExclude>pom.xml</checkModificationExclude>
+                        <checkModificationExclude>CHANGELOG.md</checkModificationExclude>
+                    </checkModificationExcludes>
+                    <pushChanges>false</pushChanges>
+                    <localCheckout>true</localCheckout>
+                    <preparationGoals>git-changelog-maven-plugin:git-changelog@GenerateGitChangelog scm:add@add-changelog</preparationGoals>
+                    <goals>package</goals>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>se.bjurr.gitchangelog</groupId>
+                <artifactId>git-changelog-maven-plugin</artifactId>
+                <version>2.2.11</version>
+                <executions>
+                    <execution>
+                        <id>GenerateGitChangelog</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>git-changelog</goal>
+                        </goals>
+                        <configuration>
+                            <templateFile>changelog.mustache</templateFile>
+                            <readableTagName>-([^-]+?)$</readableTagName>
+                            <untaggedName>v${project.version}</untaggedName>
+                            <file>CHANGELOG.md</file>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-plugin</artifactId>
+                <version>2.1.0</version>
+                <executions>
+                    <execution>
+                        <id>add-changelog</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>add</goal>
+                        </goals>
+                        <configuration>
+                            <includes>CHANGELOG.md</includes>
                         </configuration>
                     </execution>
                 </executions>
