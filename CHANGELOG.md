@@ -1,58 +1,7 @@
 # Changelog
 
-## v1.1.5
-* Github release workflow - test 12
-* [maven-release-plugin] prepare for next development iteration
-
-## refs/tags/v1.1.4
-* [maven-release-plugin] prepare release v1.1.4
-* Github release workflow - test 12
-* [maven-release-plugin] prepare for next development iteration
-
-## refs/tags/v1.1.3
-* [maven-release-plugin] prepare release v1.1.3
-* Github release workflow - test 12
-* [maven-release-plugin] prepare release v1.1.1
-* [maven-release-plugin] prepare for next development iteration
-* Github release workflow - test 12
-* Github release workflow - test 12
-* xyz
-* Github release workflow - test 12
-* Github release workflow - test 12
-* Github release workflow - test 12
-* Github release workflow - test 12
-* Github release workflow - test 12
-* [maven-release-plugin] prepare release v1.1.0
-* [maven-release-plugin] prepare for next development iteration
-* Github release workflow - test 12
-* Github release workflow - test 11
-* docs: update changelog for version 1.1.2
-* [maven-release-plugin] prepare for next development iteration
-
-## refs/tags/v1.1.2
-* [maven-release-plugin] prepare release v1.1.2
-* Github release workflow - test 10
-* [maven-release-plugin] prepare for next development iteration
-
-## refs/tags/v1.0.1
-* [maven-release-plugin] prepare release v1.0.1
-* Github release workflow - test 9
-* Github release workflow - test 8
-* Github release workflow - test 7
-* [maven-release-plugin] prepare for next development iteration
-
-## refs/tags/v1.0.0
-* [maven-release-plugin] prepare release v1.0.0
-* docs: update changelog for version 1.0.0
-* Github release workflow - test 6
-* docs: update changelog for version 1.0.0
-* Github release workflow - test 5
-* Github release workflow - test 4
-* Github release workflow - test 3
-* Github release workflow - test 2
-* Github release workflow - fix
-* Github release workflow - fix
-* Github release workflow
+## v1.0.0
+* Introduce Github release workflow
 * Fix arch tests
 * ** Removal of RedBay integrator **
 * Removal of Dynamics integrator

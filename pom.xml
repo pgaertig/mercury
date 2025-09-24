@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>pl.amitec</groupId>
     <artifactId>mercury</artifactId>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>mercury</name>
     <packaging>jar</packaging>
 
@@ -216,7 +216,7 @@
 
     <scm>
         <developerConnection>scm:git:https://github.com/pgaertig/mercury.git</developerConnection>
-        <tag>v1.1.1</tag>
+        <tag>v1.0.0</tag>
     </scm>
 
     <build>
