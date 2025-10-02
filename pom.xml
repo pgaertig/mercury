@@ -17,8 +17,8 @@
         <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
         <propane.basedir>${project.basedir}</propane.basedir>
         <source.directory>src</source.directory>
-        <junit.jupiter.version>5.13.4</junit.jupiter.version>
-        <junit.platform.version>1.13.4</junit.platform.version>
+        <junit.jupiter.version>6.0.0</junit.jupiter.version>
+        <junit.platform.version>6.0.0</junit.platform.version>
         <feign.version>13.6</feign.version>
     </properties>
 
