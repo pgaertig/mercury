@@ -1,6 +1,14 @@
 # Changelog
 
-## v1.0.0
+## v1.1.0
+* Adjust directories; PS fixes
+* chore: bump Junit version to 6.0.0
+* Configure dependabot
+* docs: README.md and Maven wrapper
+* [maven-release-plugin] prepare for next development iteration
+
+## refs/tags/v1.0.0
+* [maven-release-plugin] prepare release v1.0.0
 * Introduce Github release workflow
 * Fix arch tests
 * ** Removal of RedBay integrator **
