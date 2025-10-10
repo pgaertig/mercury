@@ -122,6 +122,8 @@ public class BitbeeClient {
             AuthTokenResponse tokenResponse = JSON_MAPPER.readValue(response.body(), AuthTokenResponse.class);
             token = tokenResponse.token();
         } else {
+            LOG.error("Failing request: {}", request);
+            LOG.error("Failing response: {}", response);
             throw new BitbeeClientException(
                     String.format("Authorization failed (apikey=%s, auth_id=%s, auth_pass=%s): %s",
                             apikey, authId, authPass, response.body()));
@@ -140,13 +142,19 @@ public class BitbeeClient {
                 .POST(HttpRequest.BodyPublishers.ofString(JSON_MAPPER.writeValueAsString(userLogin)))
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        UserLoginResponse loginResponse = JSON_MAPPER.readValue(response.body(), UserLoginResponse.class);
 
         if (response.statusCode() == 200) {
-            LOG.debug("Login body: {}", response.body());
-            token = response.headers().firstValue("refreshed-token").get();
-            userPublicKey = loginResponse.publicKey();
+            try {
+                UserLoginResponse loginResponse = JSON_MAPPER.readValue(response.body(), UserLoginResponse.class);
+                LOG.debug("Login body: {}", response.body());
+                token = response.headers().firstValue("refreshed-token").get();
+                userPublicKey = loginResponse.publicKey();
+            } catch (JsonProcessingException e) {
+                throw new BitbeeClientException("Can't process login response body as JSON: " + response.body(), e);
+            }
         } else {
+            LOG.error("Failing request: {}", request); //TODO curl style
+            LOG.error("Failing response: {}", response);
             throw new BitbeeClientException(
                     String.format("Authorization failed (apikey=%s, auth_id=%s, auth_pass=%s): %s", apikey, authId, authPass, response.body()));
         }

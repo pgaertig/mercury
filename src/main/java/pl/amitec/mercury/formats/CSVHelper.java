@@ -44,7 +44,7 @@ public class CSVHelper {
 
         @Override
         public Set<Map.Entry<String, String>> entrySet() {
-            throw new UnsupportedOperationException();
+            return record.toMap().entrySet();
         }
 
         @Override

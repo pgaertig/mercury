@@ -95,7 +95,7 @@ public class PolsoftFtp {
 
         List<String> toDelete = Stream.concat(
                 Arrays.stream(REQUIRED_FILES),
-                Stream.of(STATE_JSON, ".")).toList();
+                Stream.of(STATE_JSON, "")).toList();
 
         for (String path : toDelete) {
             Path filePath = state.getExportCacheDir().resolve(path);
@@ -288,6 +288,10 @@ public class PolsoftFtp {
     }
 
     private boolean hasFilesInDirectory(Path directory) throws IOException {
+        if(!Files.exists(directory) || !Files.isDirectory(directory)) {
+            LOG.warn("Directory {} does not exist yet.", directory);
+            return false;
+        }
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory)) {
             Iterator<Path> iterator = stream.iterator();
             return iterator.hasNext();

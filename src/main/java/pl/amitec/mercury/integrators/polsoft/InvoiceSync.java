@@ -67,9 +67,9 @@ public class InvoiceSync {
                     .generated(asLocalDate(psInvoice.get("data_wyst"), DOT_DATE_FORMAT))
                     .payment(asLocalDate(psInvoice.get("data_platn"), DOT_DATE_FORMAT))
                     .paid(asLocalDate(psInvoice.get("data_ost_splaty"), DASH_DATE_FORMAT))
-                    .deposit(new BigDecimal(psInvoice.get("dlug")))
-                    .netto(new BigDecimal(psInvoice.get("wartosc_netto")))
-                    .brutto(new BigDecimal(psInvoice.get("kwota")))
+                    .deposit(asBigDecimal(psInvoice.get("dlug")))
+                    .netto(asBigDecimal(psInvoice.get("wartosc_netto")))
+                    .brutto(asBigDecimal(psInvoice.get("kwota")))
                     .company(bitbeeClient.getCompanyBySourceId(source, psCompanyId).orElseThrow()).build();
             if(existing.isEmpty()) {
                 bitbeeClient.addInvoice(bbInvoice);
@@ -84,5 +84,12 @@ public class InvoiceSync {
             return null;
         }
         return LocalDate.parse(str, dateTimeFormatter);
+    }
+
+    public BigDecimal asBigDecimal(String str) {
+        if(str == null || str.trim().isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        return new BigDecimal(str);
     }
 }

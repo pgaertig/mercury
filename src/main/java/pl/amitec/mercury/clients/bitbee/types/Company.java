@@ -1,10 +1,11 @@
 package pl.amitec.mercury.clients.bitbee.types;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.List;
 import java.util.Map;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record Company(
         String source,
         @JsonProperty("sourceid") String sourceId,

@@ -9,7 +9,7 @@
         <!-- We will assign a value to 'plan' via Java code -->
         <discriminator>
             <key>plan-log</key>
-            <defaultValue>log/mercury.</defaultValue>
+            <defaultValue>logs/mercury.</defaultValue>
         </discriminator>
 
         <sift>
@@ -47,7 +47,7 @@
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>
-                log/mercury-error.%d{yyyy-MM-dd}.log.gz
+                logs/mercury-error.%d{yyyy-MM-dd}.log.gz
             </fileNamePattern>
             <maxHistory>14</maxHistory>
         </rollingPolicy>
